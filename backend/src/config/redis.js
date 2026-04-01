@@ -1,9 +1,21 @@
 const redis = require('redis');
 require('dotenv').config();
 
-const client = redis.createClient({
-  url: process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`,
-});
+const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`;
+
+const clientConfig = {
+  url: redisUrl,
+};
+
+// Railway Redis requires TLS (rediss:// protocol)
+if (redisUrl.startsWith('rediss://')) {
+  clientConfig.socket = {
+    tls: true,
+    rejectUnauthorized: false,
+  };
+}
+
+const client = redis.createClient(clientConfig);
 
 client.on('connect', () => {
   console.log('Connected to Redis successfully!');
