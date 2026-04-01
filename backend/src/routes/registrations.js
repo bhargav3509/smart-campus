@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const pool = require('../config/db');
+const { sendRegistrationCancelledEmail } = require('../services/emailService');
 
 // Get my registrations
 router.get('/my', auth, async (req, res) => {
@@ -24,10 +25,28 @@ router.get('/my', auth, async (req, res) => {
 // Cancel registration
 router.delete('/:eventId', auth, async (req, res) => {
   try {
+    // Get event title and user info before deleting
+    const eventResult = await pool.query(
+      'SELECT title FROM events WHERE id = $1', [req.params.eventId]
+    );
+    const userResult = await pool.query(
+      'SELECT name, email FROM users WHERE id = $1', [req.user.id]
+    );
+
     await pool.query(
-      `DELETE FROM registrations WHERE event_id = $1 AND user_id = $2`,
+      'DELETE FROM registrations WHERE event_id = $1 AND user_id = $2',
       [req.params.eventId, req.user.id]
     );
+
+    // Send cancellation email
+    if (eventResult.rows[0] && userResult.rows[0]) {
+      sendRegistrationCancelledEmail(
+        userResult.rows[0].email,
+        userResult.rows[0].name,
+        eventResult.rows[0].title
+      );
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ message: err.message });

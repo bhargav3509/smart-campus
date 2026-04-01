@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const path = require('path');
 const pool = require('./config/db');
 const redis = require('./config/redis');
 const authRoutes = require('./routes/auth');
@@ -11,6 +12,7 @@ const bookingRoutes = require('./routes/bookings');
 const notificationRoutes = require('./routes/notifications');
 const registrationRoutes = require('./routes/registrations');
 const analyticsRoutes = require('./routes/analytics');
+const profileRoutes = require('./routes/profile');
 
 dotenv.config();
 const app = express();
@@ -21,7 +23,9 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -34,6 +38,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Smart Campus API is running!' });
@@ -45,6 +50,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

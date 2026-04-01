@@ -68,18 +68,34 @@ exports.updateBookingStatus = async (req, res) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Admins only' });
     }
+
     const result = await pool.query(
       `UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`,
       [status, req.params.id]
     );
     const booking = result.rows[0];
 
-    // Notify the user who made the booking
-    const venueResult = await pool.query(`SELECT name FROM venues WHERE id = $1`, [booking.venue_id]);
-    const venueName = venueResult.rows[0]?.name || 'your venue';
+    // Get venue name
+    const venueResult = await pool.query(
+      'SELECT name FROM venues WHERE id = $1', [booking.venue_id]
+    );
+    booking.venue_name = venueResult.rows[0]?.name || 'Unknown venue';
+
+    // Notify the user
+    const userResult = await pool.query(
+      'SELECT name, email FROM users WHERE id = $1', [booking.user_id]
+    );
+    const user = userResult.rows[0];
+
+    // Send email notification
+    const { sendBookingStatusEmail } = require('../services/emailService');
+    sendBookingStatusEmail(user.email, user.name, booking, status);
+
+    // Also create in-app notification
+    const { createNotification } = require('./notificationController');
     await createNotification(
       booking.user_id,
-      `Your booking for "${venueName}" has been ${status}.`
+      `Your booking for "${booking.venue_name}" has been ${status}.`
     );
 
     res.json(booking);
