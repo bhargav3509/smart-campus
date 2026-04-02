@@ -12,6 +12,7 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [sortOption, setSortOption] = useState('upcoming');
   const fetchEvents = useCallback(async (searchTerm = '') => {
     setLoading(true);
     try {
@@ -73,14 +74,27 @@ const Events = () => {
       </nav>
 
       <div className="max-w-5xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
             All Events
             {events.length > 0 && (
               <span className="ml-2 text-sm font-normal text-gray-400">{events.length} found</span>
             )}
           </h2>
-          <SearchBar value={search} onChange={setSearch} placeholder="Search events..." />
+          <div className="flex w-full md:w-auto flex-col md:flex-row items-stretch md:items-center gap-3">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm"
+            >
+              <option value="upcoming">Sort: Upcoming First</option>
+              <option value="newest">Sort: Date Uploaded (Newest)</option>
+              <option value="ended_last">Sort: Ended Last</option>
+            </select>
+            <div className="flex-1 md:flex-none">
+              <SearchBar value={search} onChange={setSearch} placeholder="Search events..." />
+            </div>
+          </div>
         </div>
 
         {loading ? (
@@ -98,7 +112,20 @@ const Events = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {events.map(event => {
+            {[...events].sort((a, b) => {
+              const now = new Date();
+              const aIsEnded = new Date(a.end_time) < now;
+              const bIsEnded = new Date(b.end_time) < now;
+              if (sortOption === 'ended_last') {
+                if (aIsEnded && !bIsEnded) return 1;
+                if (!aIsEnded && bIsEnded) return -1;
+                return new Date(a.start_time) - new Date(b.start_time);
+              } else if (sortOption === 'newest') {
+                return b.id - a.id;
+              } else {
+                return new Date(a.start_time) - new Date(b.start_time);
+              }
+            }).map(event => {
               const registered = registeredEvents.includes(event.id);
               return (
                 <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
