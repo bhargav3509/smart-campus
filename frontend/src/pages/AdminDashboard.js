@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [showVenueForm, setShowVenueForm] = useState(false);
   const [eventSearch, setEventSearch] = useState('');
   const [venueSearch, setVenueSearch] = useState('');
+  const [sortEventOption, setSortEventOption] = useState('upcoming');
   const [posterFile, setPosterFile] = useState(null);
   const [posterPreview, setPosterPreview] = useState(null);
   const [eventForm, setEventForm] = useState({
@@ -150,7 +151,20 @@ const AdminDashboard = () => {
   const filteredEvents = events.filter(e =>
     e.title.toLowerCase().includes(eventSearch.toLowerCase()) ||
     (e.venue_name || '').toLowerCase().includes(eventSearch.toLowerCase())
-  );
+  ).sort((a, b) => {
+    const now = new Date();
+    const aIsEnded = new Date(a.end_time) < now;
+    const bIsEnded = new Date(b.end_time) < now;
+    if (sortEventOption === 'ended_last') {
+      if (aIsEnded && !bIsEnded) return 1;
+      if (!aIsEnded && bIsEnded) return -1;
+      return new Date(a.start_time) - new Date(b.start_time);
+    } else if (sortEventOption === 'newest') {
+      return b.id - a.id;
+    } else {
+      return new Date(a.start_time) - new Date(b.start_time);
+    }
+  });
 
   const filteredVenues = venues.filter(v =>
     v.name.toLowerCase().includes(venueSearch.toLowerCase()) ||
@@ -209,7 +223,16 @@ const AdminDashboard = () => {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Events</h2>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                <select
+                  value={sortEventOption}
+                  onChange={(e) => setSortEventOption(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm"
+                >
+                  <option value="upcoming">Sort: Upcoming First</option>
+                  <option value="newest">Sort: Date Uploaded (Newest)</option>
+                  <option value="ended_last">Sort: Ended Last</option>
+                </select>
                 <SearchBar value={eventSearch} onChange={setEventSearch} placeholder="Search events..." />
                 <button
                   onClick={() => setShowEventForm(!showEventForm)}
