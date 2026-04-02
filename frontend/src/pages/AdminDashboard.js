@@ -160,7 +160,7 @@ const AdminDashboard = () => {
       if (!aIsEnded && bIsEnded) return -1;
       return new Date(a.start_time) - new Date(b.start_time);
     } else if (sortEventOption === 'newest') {
-      return b.id - a.id;
+      return new Date(b.created_at) - new Date(a.created_at);
     } else {
       return new Date(a.start_time) - new Date(b.start_time);
     }
