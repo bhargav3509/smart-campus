@@ -42,7 +42,7 @@ const Login = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-blue-700 dark:text-blue-400 mb-2">
-          Smart Campus
+          EveSphere
         </h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Sign in to your account</p>
 

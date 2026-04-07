@@ -34,7 +34,7 @@ const QRModal = ({ event, onClose }) => {
 
         {/* Header */}
         <div className="bg-blue-600 px-6 py-4 text-white text-center">
-          <p className="text-xs uppercase tracking-widest mb-1 opacity-80">Smart Campus</p>
+          <p className="text-xs uppercase tracking-widest mb-1 opacity-80">EveSphere</p>
           <h2 className="text-xl font-bold">{event.title}</h2>
           <span className="inline-block mt-2 bg-green-400 text-green-900 text-xs font-bold px-3 py-1 rounded-full">
             ✓ Registered

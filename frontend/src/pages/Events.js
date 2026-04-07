@@ -62,7 +62,7 @@ const Events = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Smart Campus — Events</h1>
+        <h1 className="text-xl font-bold">EveSphere — Events</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm">{user?.name}</span>
           <DarkModeToggle />

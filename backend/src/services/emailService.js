@@ -43,7 +43,7 @@ const sendRegistrationConfirmation = async (userEmail, userName, event) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 24px; border-radius: 12px;">
         <div style="background: #1d4ed8; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 22px;">Smart Campus</h1>
+          <h1 style="color: white; margin: 0; font-size: 22px;">EveSphere</h1>
         </div>
         <h2 style="color: #1f2937;">Hi ${userName}, you're registered! 🎉</h2>
         <p style="color: #6b7280;">Your registration for the following event has been confirmed:</p>
@@ -55,7 +55,7 @@ const sendRegistrationConfirmation = async (userEmail, userName, event) => {
         </div>
         <p style="color: #6b7280; font-size: 14px;">See you there!</p>
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Smart Campus Management Platform</p>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">EveSphere Management Platform</p>
       </div>
     `,
   });
@@ -70,7 +70,7 @@ const sendBookingStatusEmail = async (userEmail, userName, booking, status) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 24px; border-radius: 12px;">
         <div style="background: #1d4ed8; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 22px;">Smart Campus</h1>
+          <h1 style="color: white; margin: 0; font-size: 22px;">EveSphere</h1>
         </div>
         <h2 style="color: #1f2937;">Hi ${userName}, your booking has been ${status}.</h2>
         <div style="background: white; border-left: 4px solid ${isApproved ? '#16a34a' : '#dc2626'}; padding: 16px; border-radius: 8px; margin: 16px 0;">
@@ -84,7 +84,7 @@ const sendBookingStatusEmail = async (userEmail, userName, booking, status) => {
           : '<p style="color: #6b7280;">Unfortunately your booking request was not approved. Please try a different time slot or venue.</p>'
         }
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Smart Campus Management Platform</p>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">EveSphere Management Platform</p>
       </div>
     `,
   });
@@ -98,7 +98,7 @@ const sendEventPublishedEmail = async (userEmail, userName, event) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 24px; border-radius: 12px;">
         <div style="background: #1d4ed8; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 22px;">Smart Campus</h1>
+          <h1 style="color: white; margin: 0; font-size: 22px;">EveSphere</h1>
         </div>
         <h2 style="color: #1f2937;">Hi ${userName}, a new event is available!</h2>
         <div style="background: white; border-left: 4px solid #7c3aed; padding: 16px; border-radius: 8px; margin: 16px 0;">
@@ -108,9 +108,9 @@ const sendEventPublishedEmail = async (userEmail, userName, event) => {
           <p style="color: #374151; margin: 4px 0;">📅 ${new Date(event.start_time).toLocaleString()}</p>
           <p style="color: #374151; margin: 4px 0;">👥 Max ${event.max_attendees} attendees</p>
         </div>
-        <p style="color: #6b7280;">Log in to Smart Campus to register for this event.</p>
+        <p style="color: #6b7280;">Log in to EveSphere to register for this event.</p>
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Smart Campus Management Platform</p>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">EveSphere Management Platform</p>
       </div>
     `,
   });
@@ -124,13 +124,13 @@ const sendRegistrationCancelledEmail = async (userEmail, userName, eventTitle) =
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 24px; border-radius: 12px;">
         <div style="background: #1d4ed8; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 22px;">Smart Campus</h1>
+          <h1 style="color: white; margin: 0; font-size: 22px;">EveSphere</h1>
         </div>
         <h2 style="color: #1f2937;">Hi ${userName},</h2>
         <p style="color: #6b7280;">Your registration for <strong>${eventTitle}</strong> has been cancelled.</p>
         <p style="color: #6b7280;">You can re-register anytime from your dashboard.</p>
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-        <p style="color: #9ca3af; font-size: 12px; text-align: center;">Smart Campus Management Platform</p>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">EveSphere Management Platform</p>
       </div>
     `,
   });
