@@ -17,6 +17,7 @@ const AnalyticsDashboard = () => {
   const { user, logout } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => { fetchStats(); }, []);
 
@@ -33,19 +34,46 @@ const AnalyticsDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">EveSphere — Analytics</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm">Welcome, {user?.name}</span>
-          <DarkModeToggle />
-          <NotificationBell />
-          <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-            Logout
-          </button>
+      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">EveSphere — Analytics</h1>
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-4">
+            <span className="text-sm">Welcome, {user?.name}</span>
+            <DarkModeToggle />
+            <NotificationBell />
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+          {/* Mobile: bell + hamburger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
+            <span className="text-sm px-2">Welcome, {user?.name}</span>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Platform Overview</h2>
 
         {loading ? (
@@ -68,12 +96,13 @@ const AnalyticsDashboard = () => {
               <StatCard label="Approved Bookings" value={stats.bookings.approved} sub="Venue bookings confirmed" color="border-teal-500" />
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6">
               <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Top Events by Registrations</h3>
               {stats.topEvents.length === 0 ? (
                 <p className="text-gray-400 text-sm">No event data yet.</p>
               ) : (
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="text-left text-gray-400 dark:text-gray-500 border-b dark:border-gray-700">
                       <th className="pb-3">Event</th>
@@ -108,6 +137,7 @@ const AnalyticsDashboard = () => {
                     })}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
           </>

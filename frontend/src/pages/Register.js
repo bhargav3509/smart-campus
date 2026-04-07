@@ -32,8 +32,8 @@ const Register = () => {
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-md">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4">
+      <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-blue-700 dark:text-blue-400 mb-2">EveSphere</h1>
         <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Create your account</p>
 

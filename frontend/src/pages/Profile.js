@@ -15,6 +15,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -142,7 +143,7 @@ const Profile = () => {
     if (profile?.role === 'student') {
       return (
         <>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>UID / Roll Number</label>
               <input type="text" placeholder="e.g. 22BCS001" value={form.uid}
@@ -169,7 +170,7 @@ const Profile = () => {
     if (profile?.role === 'faculty') {
       return (
         <>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Employee ID</label>
               <input type="text" placeholder="e.g. FAC001" value={form.employee_id}
@@ -195,7 +196,7 @@ const Profile = () => {
 
     if (profile?.role === 'admin') {
       return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Employee ID</label>
             <input type="text" placeholder="e.g. ADM001" value={form.employee_id}
@@ -223,30 +224,56 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={goBack}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
-          >
-            ← Back
-          </button>
-          <h1 className="text-xl font-bold">My Profile</h1>
+      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={goBack}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
+            >
+              ← Back
+            </button>
+            <h1 className="text-xl font-bold">My Profile</h1>
+          </div>
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-4">
+            <DarkModeToggle />
+            <NotificationBell />
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+          {/* Mobile: bell + hamburger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <DarkModeToggle />
-          <NotificationBell />
-          <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-            Logout
-          </button>
-        </div>
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6">
 
         {/* Profile Header Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 mb-6">
-          <div className="flex items-center gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                 {avatarPreview ? (
@@ -270,7 +297,7 @@ const Profile = () => {
               </label>
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 text-center sm:text-left">
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{profile?.name}</h2>
               <p className="text-gray-500 dark:text-gray-400">{profile?.email}</p>
               <div className="flex items-center gap-2 mt-2">
@@ -299,7 +326,7 @@ const Profile = () => {
 
             <button
               onClick={() => setEditing(!editing)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+              className={`mt-2 sm:mt-0 px-4 py-2 rounded-lg text-sm font-semibold transition self-start ${
                 editing
                   ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -326,10 +353,10 @@ const Profile = () => {
 
         {/* Edit Form */}
         {editing && (
-          <form onSubmit={handleSave} className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 mb-6 space-y-4">
+          <form onSubmit={handleSave} className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6 mb-6 space-y-4">
             <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Edit Profile</h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Full Name</label>
                 <input type="text" value={form.name}
@@ -375,9 +402,9 @@ const Profile = () => {
         )}
 
         {/* Profile Details Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6">
           <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Profile Details</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {getProfileFields().map(({ label, value, icon }) => (
               <div key={label} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{icon} {label}</p>

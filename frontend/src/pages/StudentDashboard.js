@@ -64,28 +64,62 @@ const StudentDashboard = () => {
   const getRegistration = (eventId) => myRegistrations.find(r => r.event_id === eventId);
   const isPast = (endTime) => new Date(endTime) < new Date();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">EveSphere</h1>
-        <div className="flex items-center gap-4">
-          <button
-  onClick={() => navigate('/profile')}
-  className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
->
-  👤 {user?.name}
-</button>
-          <DarkModeToggle />
-          <NotificationBell />
-          <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-            Logout
-          </button>
+      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">EveSphere</h1>
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
+            >
+              👤 {user?.name}
+            </button>
+            <DarkModeToggle />
+            <NotificationBell />
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+          {/* Mobile: bell + hamburger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
+            <button
+              onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg text-sm font-semibold transition"
+            >
+              👤 {user?.name}
+            </button>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6">
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 sm:gap-4 mb-6">
           {['events', 'my registrations'].map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-lg font-semibold capitalize ${
@@ -182,7 +216,7 @@ const StudentDashboard = () => {
             ) : (
               <div className="space-y-4">
                 {myRegistrations.map(reg => (
-                  <div key={reg.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 flex justify-between items-center">
+                  <div key={reg.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                       <h3 className="font-bold text-gray-800 dark:text-white">{reg.event_title}</h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">📍 {reg.venue_name || 'TBA'}</p>
@@ -191,17 +225,17 @@ const StudentDashboard = () => {
                         reg.status === 'attended' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                       }`}>{reg.status}</span>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
                       <button
                         onClick={() => setQrEvent({ id: reg.event_id, title: reg.event_title, registration: reg })}
-                        className="bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100"
+                        className="flex-1 sm:flex-none bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100"
                       >
                         🎟️ QR Ticket
                       </button>
                       {reg.status === 'registered' && (
                         <button
                           onClick={() => handleCancelRegistration(reg.event_id)}
-                          className="bg-red-50 dark:bg-red-900 text-red-500 dark:text-red-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-100"
+                          className="flex-1 sm:flex-none bg-red-50 dark:bg-red-900 text-red-500 dark:text-red-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-100"
                         >
                           Cancel
                         </button>

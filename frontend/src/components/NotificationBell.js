@@ -42,7 +42,7 @@ const NotificationBell = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-[min(320px,calc(100vw-2rem))] bg-white rounded-xl shadow-xl z-50 overflow-hidden">
           <div className="flex justify-between items-center px-4 py-3 border-b">
             <h3 className="font-bold text-gray-800">Notifications</h3>
             {unreadCount > 0 && (

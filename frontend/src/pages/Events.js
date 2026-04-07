@@ -13,6 +13,7 @@ const Events = () => {
   const [search, setSearch] = useState('');
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [sortOption, setSortOption] = useState('upcoming');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fetchEvents = useCallback(async (searchTerm = '') => {
     setLoading(true);
     try {
@@ -61,19 +62,46 @@ const Events = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">EveSphere — Events</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm">{user?.name}</span>
-          <DarkModeToggle />
-          <NotificationBell />
-          <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-            Logout
-          </button>
+      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">EveSphere — Events</h1>
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-4">
+            <span className="text-sm">{user?.name}</span>
+            <DarkModeToggle />
+            <NotificationBell />
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+          {/* Mobile: bell + hamburger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
+            <span className="text-sm px-2">{user?.name}</span>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
             All Events

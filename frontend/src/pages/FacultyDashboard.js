@@ -16,6 +16,7 @@ const FacultyDashboard = () => {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [posterFile, setPosterFile] = useState(null);
   const [posterPreview, setPosterPreview] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [eventForm, setEventForm] = useState({
     title: '', description: '', venue_id: '',
     start_time: '', end_time: '', max_attendees: ''
@@ -100,26 +101,59 @@ const FacultyDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">EveSphere — Faculty</h1>
-        <div className="flex items-center gap-4">
-          <button
-  onClick={() => navigate('/profile')}
-  className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
->
-  👤 {user?.name}
-</button>
-          <DarkModeToggle />
-          <NotificationBell />
-          <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-            Logout
-          </button>
+      {/* Navbar */}
+      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">EveSphere — Faculty</h1>
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
+            >
+              👤 {user?.name}
+            </button>
+            <DarkModeToggle />
+            <NotificationBell />
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+              Logout
+            </button>
+          </div>
+          {/* Mobile: bell + hamburger */}
+          <div className="flex sm:hidden items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
+            <button
+              onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg text-sm font-semibold transition"
+            >
+              👤 {user?.name}
+            </button>
+            <div className="flex items-center gap-2">
+              <DarkModeToggle />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
 
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6">
         {/* Events Section */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">My Events</h2>
           <button onClick={() => setShowEventForm(!showEventForm)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
@@ -128,7 +162,7 @@ const FacultyDashboard = () => {
         </div>
 
         {showEventForm && (
-          <form onSubmit={handleCreateEvent} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 space-y-4">
+          <form onSubmit={handleCreateEvent} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 mb-6 space-y-4">
             <h3 className="font-bold text-lg text-gray-800 dark:text-white">New Event</h3>
             <input type="text" placeholder="Event Title" value={eventForm.title}
               onChange={e => setEventForm({...eventForm, title: e.target.value})} className={inputClass} required />
@@ -139,7 +173,7 @@ const FacultyDashboard = () => {
               <option value="">Select Venue</option>
               {venues.map(v => <option key={v.id} value={v.id}>{v.name} (Capacity: {v.capacity})</option>)}
             </select>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm text-gray-600 dark:text-gray-400">Start Time</label>
                 <input type="datetime-local" value={eventForm.start_time}
@@ -181,19 +215,19 @@ const FacultyDashboard = () => {
             <p className="text-gray-500 dark:text-gray-400">No events yet. Create your first event!</p>
           ) : (
             events.map(event => (
-              <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+              <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6">
                 {event.poster_url && (
                   <img src={event.poster_url?.startsWith('http') ? event.poster_url : `${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${event.poster_url}`} alt={event.title}
                     className="w-full h-40 object-cover rounded-lg mb-3" />
                 )}
-                <div className="flex justify-between items-start">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                  <div className="min-w-0">
                     <h3 className="font-bold text-gray-800 dark:text-white">{event.title}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{event.description}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">📅 {new Date(event.start_time).toLocaleString()}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">📍 {event.venue_name || 'No venue assigned'}</p>
                   </div>
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full self-start ${
                     event.status === 'published' ? 'bg-green-100 text-green-700'
                     : event.status === 'draft' ? 'bg-gray-100 text-gray-600'
                     : 'bg-yellow-100 text-yellow-700'
@@ -206,7 +240,7 @@ const FacultyDashboard = () => {
 
         {/* Bookings Section */}
         <div className="border-t dark:border-gray-700 pt-8">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">My Venue Bookings</h2>
             <button onClick={() => setShowBookingForm(!showBookingForm)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
@@ -215,14 +249,14 @@ const FacultyDashboard = () => {
           </div>
 
           {showBookingForm && (
-            <form onSubmit={handleCreateBooking} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-6 space-y-4">
+            <form onSubmit={handleCreateBooking} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 mb-6 space-y-4">
               <h3 className="font-bold text-lg text-gray-800 dark:text-white">New Booking Request</h3>
               <select value={bookingForm.venue_id}
                 onChange={e => setBookingForm({...bookingForm, venue_id: e.target.value})} className={inputClass} required>
                 <option value="">Select Venue</option>
                 {venues.map(v => <option key={v.id} value={v.id}>{v.name} (Capacity: {v.capacity})</option>)}
               </select>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-gray-600 dark:text-gray-400">Start Time</label>
                   <input type="datetime-local" value={bookingForm.start_time}
@@ -246,17 +280,17 @@ const FacultyDashboard = () => {
               <p className="text-gray-500 dark:text-gray-400">No booking requests yet.</p>
             ) : (
               myBookings.map(b => (
-                <div key={b.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 flex justify-between items-center">
-                  <div>
+                <div key={b.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <div className="min-w-0">
                     <h3 className="font-bold text-gray-800 dark:text-white">{b.venue_name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 break-words">
                       📅 {new Date(b.start_time).toLocaleString()} → {new Date(b.end_time).toLocaleString()}
                     </p>
                     <span className={statusBadge(b.status)}>{b.status}</span>
                   </div>
                   {b.status === 'pending' && (
                     <button onClick={() => handleCancelBooking(b.id)}
-                      className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-200">
+                      className="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-200 shrink-0">
                       Cancel
                     </button>
                   )}
