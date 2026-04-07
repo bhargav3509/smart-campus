@@ -4,6 +4,7 @@ const {
   sendRegistrationCancelledEmail,
 } = require('../services/emailService');
 const pool = require('../config/db');
+const { uploadToS3 } = require('../utils/s3');
 
 // Get all events
 // Get all events (with optional search & filter)
@@ -71,9 +72,10 @@ exports.createEvent = async (req, res) => {
       return res.status(403).json({ message: 'Faculty or Admin only' });
     }
 
-    const poster_url = req.file
-  ? `/uploads/${req.file.filename}`
-  : null;
+    let poster_url = null;
+    if (req.file) {
+      poster_url = await uploadToS3(req.file, 'posters');
+    }
 
     const result = await pool.query(
       `INSERT INTO events (title, description, organizer_id, venue_id, start_time, end_time, max_attendees, poster_url)
@@ -160,7 +162,7 @@ exports.updateEventPoster = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const poster_url = `/uploads/posters/${req.file.filename}`;
+    const poster_url = await uploadToS3(req.file, 'posters');
     const result = await pool.query(
       `UPDATE events SET poster_url = $1 WHERE id = $2 RETURNING *`,
       [poster_url, req.params.id]

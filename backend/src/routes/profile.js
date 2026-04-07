@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const pool = require('../config/db');
 const upload = require('../utils/upload');
+const { uploadToS3 } = require('../utils/s3');
 
 // Get my profile
 router.get('/me', auth, async (req, res) => {
@@ -53,7 +54,7 @@ router.put('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const avatar_url = `/uploads/${req.file.filename}`;
+    const avatar_url = await uploadToS3(req.file, 'avatars');
     const result = await pool.query(
       `UPDATE users SET avatar_url = $1 WHERE id = $2
        RETURNING id, name, email, role, department, phone, branch, section, uid, bio, avatar_url`,
