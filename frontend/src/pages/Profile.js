@@ -252,7 +252,7 @@ const Profile = () => {
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : profile?.avatar_url ? (
-                  <img src={`${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${profile.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={profile.avatar_url?.startsWith('http') ? profile.avatar_url : `${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${profile.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-4xl font-bold text-blue-600 dark:text-blue-300">
                     {profile?.name?.charAt(0).toUpperCase()}

@@ -121,7 +121,7 @@ const StudentDashboard = () => {
                   <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                     {event.poster_url && (
                       <img
-                        src={`${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${event.poster_url}`}
+                        src={event.poster_url?.startsWith('http') ? event.poster_url : `${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${event.poster_url}`}
                         alt={event.title}
                         className="w-full object-contain rounded-lg mb-3 bg-gray-50"
                       />
