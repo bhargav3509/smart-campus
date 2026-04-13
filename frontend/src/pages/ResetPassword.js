@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -16,12 +16,11 @@ const getStrength = (password) => {
 const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
 const strengthColors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e'];
 
-const Register = () => {
-  const [form, setForm] = useState({
-    name: '', email: '', password: '', confirm: '', role: 'student', department: ''
-  });
-  const [loading, setLoading] = useState(false);
+const ResetPassword = () => {
+  const { token } = useParams();
   const navigate = useNavigate();
+  const [form, setForm] = useState({ password: '', confirm: '' });
+  const [loading, setLoading] = useState(false);
 
   const strength = getStrength(form.password);
   const checks = {
@@ -29,10 +28,6 @@ const Register = () => {
     upper: /[A-Z]/.test(form.password),
     number: /[0-9]/.test(form.password),
     special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password),
-  };
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -45,17 +40,11 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await API.post('/auth/register', {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        role: form.role,
-        department: form.department,
-      });
-      toast.success('Account created! Please login.');
+      await API.post(`/auth/reset-password/${token}`, { password: form.password });
+      toast.success('Password reset successful! Please log in.');
       navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      toast.error(err.response?.data?.message || 'Reset failed. Link may have expired.');
     } finally {
       setLoading(false);
     }
@@ -68,21 +57,19 @@ const Register = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center text-blue-700 dark:text-blue-400 mb-2">EveSphere</h1>
-        <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Create your account</p>
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Set a new password</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={labelClass}>Full Name</label>
-            <input type="text" name="name" value={form.name} onChange={handleChange} className={inputClass} placeholder="Name" required />
-          </div>
-          <div>
-            <label className={labelClass}>Email</label>
-            <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="Email ID" required />
-          </div>
-          <div>
-            <label className={labelClass}>Password</label>
-            <input type="password" name="password" value={form.password} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
-
+            <label className={labelClass}>New Password</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className={inputClass}
+              placeholder="••••••••"
+              required
+            />
             {/* Strength bar */}
             {form.password && (
               <div className="mt-2">
@@ -100,7 +87,6 @@ const Register = () => {
                 </p>
               </div>
             )}
-
             {/* Checklist */}
             {form.password && (
               <ul className="mt-2 space-y-1">
@@ -120,7 +106,14 @@ const Register = () => {
 
           <div>
             <label className={labelClass}>Confirm Password</label>
-            <input type="password" name="confirm" value={form.confirm} onChange={handleChange} className={inputClass} placeholder="••••••••" required />
+            <input
+              type="password"
+              value={form.confirm}
+              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+              className={inputClass}
+              placeholder="••••••••"
+              required
+            />
             {form.confirm && form.password !== form.confirm && (
               <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
             )}
@@ -129,35 +122,23 @@ const Register = () => {
             )}
           </div>
 
-          <div>
-            <label className={labelClass}>Role</label>
-            <select name="role" value={form.role} onChange={handleChange} className={inputClass}>
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>Department</label>
-            <input type="text" name="department" value={form.department} onChange={handleChange} className={inputClass} placeholder="Department" />
-          </div>
-
           <button
             type="submit"
             disabled={loading || strength < 4 || form.password !== form.confirm}
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? 'Resetting...' : 'Reset Password'}
           </button>
-        </form>
 
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Sign in here</Link>
-        </p>
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
+              ← Back to Login
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default ResetPassword;

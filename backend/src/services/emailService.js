@@ -136,9 +136,33 @@ const sendRegistrationCancelledEmail = async (userEmail, userName, eventTitle) =
   });
 };
 
+// ── 5. Password Reset ──
+const sendPasswordResetEmail = async (userEmail, userName, resetLink) => {
+  await sendEmail({
+    to: userEmail,
+    subject: `🔐 Reset Your EveSphere Password`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 24px; border-radius: 12px;">
+        <div style="background: #1d4ed8; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 22px;">EveSphere</h1>
+        </div>
+        <h2 style="color: #1f2937;">Hi ${userName},</h2>
+        <p style="color: #6b7280;">We received a request to reset your password. Click the button below to set a new password.</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${resetLink}" style="background: #1d4ed8; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: bold;">Reset Password</a>
+        </div>
+        <p style="color: #9ca3af; font-size: 13px;">This link will expire in <strong>1 hour</strong>. If you didn't request a password reset, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="color: #9ca3af; font-size: 12px; text-align: center;">EveSphere Management Platform</p>
+      </div>
+    `,
+  });
+};
+
 module.exports = {
   sendRegistrationConfirmation,
   sendBookingStatusEmail,
   sendEventPublishedEmail,
   sendRegistrationCancelledEmail,
+  sendPasswordResetEmail,
 };
