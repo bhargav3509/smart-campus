@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: campus_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smart_campus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 11028
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smart-campus_default
+
+  redis:
+    image: redis:latest
+    container_name: redis_campus
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - smart-campus_default
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campus_backend
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - smart-campus_default
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campus_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - smart-campus_default
+
+volumes:
+  postgres_data:
+
+networks:
+  smart-campus_default:
+    driver: bridge
