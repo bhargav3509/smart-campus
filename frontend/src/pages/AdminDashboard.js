@@ -66,7 +66,15 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      Object.keys(eventForm).forEach(key => formData.append(key, eventForm[key]));
+      Object.keys(eventForm).forEach(key => {
+        if (key === 'start_time' || key === 'end_time') {
+          if (eventForm[key]) {
+            formData.append(key, new Date(eventForm[key]).toISOString());
+          }
+        } else {
+          formData.append(key, eventForm[key]);
+        }
+      });
       if (posterFile) formData.append('poster', posterFile);
       await API.post('/events', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Event created!');

@@ -56,7 +56,15 @@ const FacultyDashboard = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      Object.keys(eventForm).forEach(key => formData.append(key, eventForm[key]));
+      Object.keys(eventForm).forEach(key => {
+        if (key === 'start_time' || key === 'end_time') {
+          if (eventForm[key]) {
+            formData.append(key, new Date(eventForm[key]).toISOString());
+          }
+        } else {
+          formData.append(key, eventForm[key]);
+        }
+      });
       if (posterFile) formData.append('poster', posterFile);
       await API.post('/events', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Event submitted for approval!');
@@ -71,7 +79,12 @@ const FacultyDashboard = () => {
   const handleCreateBooking = async (e) => {
     e.preventDefault();
     try {
-      await API.post('/bookings', bookingForm);
+      const payload = {
+        ...bookingForm,
+        start_time: bookingForm.start_time ? new Date(bookingForm.start_time).toISOString() : '',
+        end_time: bookingForm.end_time ? new Date(bookingForm.end_time).toISOString() : ''
+      };
+      await API.post('/bookings', payload);
       toast.success('Booking request submitted!');
       setShowBookingForm(false);
       setBookingForm({ venue_id: '', start_time: '', end_time: '' });
