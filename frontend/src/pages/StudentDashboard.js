@@ -14,6 +14,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('events');
   const [qrEvent, setQrEvent] = useState(null);
+  const [sortEventOption, setSortEventOption] = useState('upcoming');
 
   useEffect(() => {
     fetchEvents();
@@ -63,6 +64,21 @@ const StudentDashboard = () => {
   const isRegistered = (eventId) => myRegistrations.some(r => r.event_id === eventId);
   const getRegistration = (eventId) => myRegistrations.find(r => r.event_id === eventId);
   const isPast = (endTime) => new Date(endTime) < new Date();
+
+  const sortedEvents = [...events].sort((a, b) => {
+    const now = new Date();
+    const aIsEnded = new Date(a.end_time) < now;
+    const bIsEnded = new Date(b.end_time) < now;
+    if (sortEventOption === 'ended_last') {
+      if (aIsEnded && !bIsEnded) return 1;
+      if (!aIsEnded && bIsEnded) return -1;
+      return new Date(a.start_time) - new Date(b.start_time);
+    } else if (sortEventOption === 'newest') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    } else {
+      return new Date(a.start_time) - new Date(b.start_time);
+    }
+  });
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -140,9 +156,18 @@ const StudentDashboard = () => {
         {/* Events Tab */}
         {activeTab === 'events' && (
           <>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-
-            </h2>
+            <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Events</h2>
+              <select
+                value={sortEventOption}
+                onChange={(e) => setSortEventOption(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm"
+              >
+                <option value="upcoming">Sort: Upcoming First</option>
+                <option value="newest">Sort: Date Uploaded (Newest)</option>
+                <option value="ended_last">Sort: Ended Last</option>
+              </select>
+            </div>
             {loading ? (
               <div className="flex justify-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -151,7 +176,7 @@ const StudentDashboard = () => {
               <p className="text-gray-500 dark:text-gray-400">No published events yet.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {events.map(event => (
+                {sortedEvents.map(event => (
                   <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
                     {event.poster_url && (
                       <img
