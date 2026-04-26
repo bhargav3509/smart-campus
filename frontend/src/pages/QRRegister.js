@@ -25,13 +25,15 @@ const QRRegister = () => {
 
   const fetchEvent = async () => {
     try {
-      const res = await API.get(`/events/${id}`);
+      const cleanId = id.replace(/\/$/, '').trim();
+      const res = await API.get(`/events/${cleanId}`);
       setEvent(res.data);
       const regRes = await API.get('/registrations/my');
-      const isReg = regRes.data.some(r => r.event_id === id);
+      const isReg = regRes.data.some(r => r.event_id === cleanId);
       if (isReg) setAlreadyRegistered(true);
     } catch (err) {
-      toast.error('Event not found');
+      const msg = err.response?.data?.message || err.message;
+      toast.error(`Error loading event: ${msg}`);
     } finally {
       setLoading(false);
     }
