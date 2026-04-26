@@ -14,7 +14,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('events');
   const [qrEvent, setQrEvent] = useState(null);
-  const [sortEventOption, setSortEventOption] = useState('upcoming');
+  const [sortEventOption, setSortEventOption] = useState('ended_last');
 
   useEffect(() => {
     fetchEvents();
