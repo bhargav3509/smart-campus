@@ -1,477 +1,240 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import toast from 'react-hot-toast';
-import NotificationBell from '../components/NotificationBell';
-import SearchBar from '../components/SearchBar';
-import DarkModeToggle from '../components/DarkModeToggle';
+import gsap from 'gsap';
+
+const BLUE = '#1a73e8';
+const GREEN = '#34a853';
+const RED = '#ea4335';
+const YELLOW = '#fbbc05';
+
+// SVG Icons
+const IconDashboard = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </svg>
+);
+
+const IconAnalytics = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+  </svg>
+);
+
+const IconVenues = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+const IconBookings = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const IconSettings = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+);
+
+const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
+  <div onClick={onClick} className={`flex flex-col items-center gap-1.5 py-4 cursor-pointer transition-all ${active ? 'text-blue-600 bg-blue-50/50' : 'text-gray-400 hover:text-gray-600'}`}>
+    <Icon />
+    <span className="text-[10px] font-black uppercase tracking-wider">{label}</span>
+  </div>
+);
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [venues, setVenues] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('events');
-  const [showEventForm, setShowEventForm] = useState(false);
-  const [showVenueForm, setShowVenueForm] = useState(false);
-  const [eventSearch, setEventSearch] = useState('');
-  const [venueSearch, setVenueSearch] = useState('');
-  const [sortEventOption, setSortEventOption] = useState('upcoming');
-  const [posterFile, setPosterFile] = useState(null);
-  const [posterPreview, setPosterPreview] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [eventForm, setEventForm] = useState({
-    title: '', description: '', venue_id: '',
-    start_time: '', end_time: '', max_attendees: ''
-  });
-  const [venueForm, setVenueForm] = useState({
-    name: '', capacity: '', location: ''
-  });
+  const [loading, setLoading] = useState(true);
+  const container = useRef(null);
 
   useEffect(() => {
-    fetchEvents();
-    fetchVenues();
-    fetchBookings();
+    fetchData();
   }, []);
 
-  const fetchEvents = async () => {
+  const fetchData = async () => {
     try {
-      const res = await API.get('/events', { params: { status: 'all' } });
-      setEvents(res.data);
-    } catch (err) {
-      toast.error('Failed to load events');
-    }
+      const [ev, vn, bk] = await Promise.all([
+        API.get('/events', { params: { status: 'all' } }),
+        API.get('/venues'),
+        API.get('/bookings')
+      ]);
+      setEvents(ev.data);
+      setVenues(vn.data);
+      setBookings(bk.data);
+    } catch { toast.error('Failed to sync data'); }
+    finally { setLoading(false); }
   };
 
-  const fetchVenues = async () => {
-    try {
-      const res = await API.get('/venues');
-      setVenues(res.data);
-    } catch (err) {
-      toast.error('Failed to load venues');
+  useEffect(() => {
+    if (!loading) {
+      const ctx = gsap.context(() => {
+        gsap.from('.sidebar', { x: -80, opacity: 0, duration: 0.6, ease: 'power3.out' });
+        gsap.from('.top-nav', { y: -60, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.1 });
+        gsap.delayedCall(0.3, () => {
+          gsap.from('.admin-card', { y: 20, opacity: 0, duration: 0.5, stagger: 0.05, ease: 'power2.out' });
+        });
+      }, container);
+      return () => ctx.revert();
     }
-  };
+  }, [loading, activeTab]);
 
-  const fetchBookings = async () => {
-    try {
-      const res = await API.get('/bookings');
-      setBookings(res.data);
-    } catch (err) {
-      toast.error('Failed to load bookings');
-    }
-  };
-
-  const handleCreateEvent = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = new FormData();
-      Object.keys(eventForm).forEach(key => {
-        if (key === 'start_time' || key === 'end_time') {
-          if (eventForm[key]) {
-            formData.append(key, new Date(eventForm[key]).toISOString());
-          }
-        } else {
-          formData.append(key, eventForm[key]);
-        }
-      });
-      if (posterFile) formData.append('poster', posterFile);
-      await API.post('/events', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      toast.success('Event created!');
-      setShowEventForm(false);
-      setEventForm({ title: '', description: '', venue_id: '', start_time: '', end_time: '', max_attendees: '' });
-      setPosterFile(null);
-      setPosterPreview(null);
-      fetchEvents();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create event');
-    }
-  };
-
-  const handleCreateVenue = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post('/venues', venueForm);
-      toast.success('Venue created!');
-      setShowVenueForm(false);
-      setVenueForm({ name: '', capacity: '', location: '' });
-      fetchVenues();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create venue');
-    }
-  };
-
-  const handlePublish = async (eventId) => {
-    try {
-      await API.put(`/events/${eventId}/publish`);
-      toast.success('Event published!');
-      fetchEvents();
-    } catch (err) {
-      toast.error('Failed to publish event');
-    }
-  };
-
-  const handleBookingStatus = async (bookingId, status) => {
-    try {
-      await API.put(`/bookings/${bookingId}/status`, { status });
-      toast.success(`Booking ${status}!`);
-      fetchBookings();
-    } catch (err) {
-      toast.error('Failed to update booking');
-    }
-  };
-
-  const handleDeleteEvent = async (eventId) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
-    try {
-      await API.delete(`/events/${eventId}`);
-      toast.success('Event deleted!');
-      fetchEvents();
-    } catch (err) {
-      toast.error('Failed to delete event');
-    }
-  };
-
-  const handleDeleteBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to delete this booking?')) return;
-    try {
-      await API.delete(`/bookings/${bookingId}`);
-      toast.success('Booking deleted!');
-      fetchBookings();
-    } catch (err) {
-      toast.error('Failed to delete booking');
-    }
-  };
-
-  const statusBadge = (status) => {
-    const styles = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      approved: 'bg-green-100 text-green-700',
-      rejected: 'bg-red-100 text-red-700',
-      cancelled: 'bg-gray-100 text-gray-500',
-      published: 'bg-green-100 text-green-700',
-      draft: 'bg-gray-100 text-gray-600',
-    };
-    return `text-xs font-semibold px-2 py-1 rounded-full ${styles[status] || 'bg-gray-100 text-gray-600'}`;
-  };
-
-  const inputClass = "w-full border dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500";
-
-  const filteredEvents = events.filter(e =>
-    e.title.toLowerCase().includes(eventSearch.toLowerCase()) ||
-    (e.venue_name || '').toLowerCase().includes(eventSearch.toLowerCase())
-  ).sort((a, b) => {
-    const now = new Date();
-    const aIsEnded = new Date(a.end_time) < now;
-    const bIsEnded = new Date(b.end_time) < now;
-    if (sortEventOption === 'ended_last') {
-      if (aIsEnded && !bIsEnded) return 1;
-      if (!aIsEnded && bIsEnded) return -1;
-      return new Date(a.start_time) - new Date(b.start_time);
-    } else if (sortEventOption === 'newest') {
-      return new Date(b.created_at) - new Date(a.created_at);
-    } else {
-      return new Date(a.start_time) - new Date(b.start_time);
-    }
-  });
-
-  const filteredVenues = venues.filter(v =>
-    v.name.toLowerCase().includes(venueSearch.toLowerCase()) ||
-    (v.location || '').toLowerCase().includes(venueSearch.toLowerCase())
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${BLUE} transparent transparent transparent` }} />
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Navbar */}
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">EveSphere — Admin</h1>
-          {/* Desktop nav */}
-          <div className="hidden sm:flex items-center gap-3">
-            <button
-              onClick={() => navigate('/analytics')}
-              className="bg-white text-blue-700 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100"
-            >
-              📊 Analytics
-            </button>
-            <button
-              onClick={() => navigate('/profile')}
-              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
-            >
-              👤 {user?.name}
-            </button>
-            <DarkModeToggle />
-            <NotificationBell />
-            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-              Logout
-            </button>
-          </div>
-          {/* Mobile: bell + hamburger */}
-          <div className="flex sm:hidden items-center gap-2">
-            <NotificationBell />
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? '✕' : '☰'}
-            </button>
+    <div ref={container} className="min-h-screen bg-[#f8f9fc] flex font-sans antialiased text-gray-900">
+      
+      {/* Sidebar */}
+      <aside className="sidebar w-20 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col items-center py-8 z-50 sticky top-0 h-screen">
+        <div className="mb-12">
+          <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </div>
         </div>
-        {/* Mobile dropdown */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
-            <button
-              onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }}
-              className="bg-white text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left"
-            >
-              📊 Analytics
-            </button>
-            <button
-              onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-              className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg text-sm font-semibold transition"
-            >
-              👤 {user?.name}
-            </button>
-            <div className="flex items-center gap-2">
-              <DarkModeToggle />
-              <span className="text-sm">Dark Mode</span>
-            </div>
-            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
-              Logout
-            </button>
-          </div>
-        )}
-      </nav>
-
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
-        {/* Tabs */}
-        <div className="flex gap-2 sm:gap-4 mb-6 flex-wrap">
-          {['events', 'venues', 'bookings'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-semibold capitalize text-sm sm:text-base ${
-                activeTab === tab
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
-              }`}
-            >
-              {tab}
-              {tab === 'bookings' && bookings.filter(b => b.status === 'pending').length > 0 && (
-                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {bookings.filter(b => b.status === 'pending').length}
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="flex-1 w-full space-y-2">
+          <SidebarItem icon={IconDashboard} label="Events" active={activeTab === 'events'} onClick={() => setActiveTab('events')} />
+          <SidebarItem icon={IconVenues} label="Venues" active={activeTab === 'venues'} onClick={() => setActiveTab('venues')} />
+          <SidebarItem icon={IconBookings} label="Bookings" active={activeTab === 'bookings'} onClick={() => setActiveTab('bookings')} />
+          <SidebarItem icon={IconAnalytics} label="Stats" />
         </div>
+        <div className="w-full">
+          <SidebarItem icon={IconSettings} label="Settings" />
+        </div>
+      </aside>
 
-        {/* ── EVENTS TAB ── */}
-        {activeTab === 'events' && (
-          <div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Events</h2>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <select
-                  value={sortEventOption}
-                  onChange={(e) => setSortEventOption(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm"
-                >
-                  <option value="upcoming">Sort: Upcoming First</option>
-                  <option value="newest">Sort: Date Uploaded (Newest)</option>
-                  <option value="ended_last">Sort: Ended Last</option>
-                </select>
-                <SearchBar value={eventSearch} onChange={setEventSearch} placeholder="Search events..." />
-                <button
-                  onClick={() => setShowEventForm(!showEventForm)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 whitespace-nowrap"
-                >
-                  + Create Event
-                </button>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0">
+        
+        {/* Top Navbar */}
+        <header className="top-nav h-20 bg-white/70 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-40">
+          <div className="flex items-center gap-8 flex-1">
+            <h1 className="text-3xl font-black tracking-tight" style={{ fontFamily: '"Big Shoulders Display", sans-serif', color: '#111' }}>Control Panel</h1>
+            <div className="hidden lg:flex items-center gap-2 bg-gray-100 rounded-full px-4 py-1.5 border border-gray-200">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">System Online</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 cursor-pointer group" onClick={() => logout()}>
+                <div className="w-10 h-10 rounded-full bg-gray-900 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-white font-bold">
+                  {user?.name?.charAt(0)}
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-xs font-black text-gray-900 uppercase tracking-wider">{user?.name}</p>
+                  <p className="text-[10px] font-bold text-blue-600 uppercase">Administrator</p>
+                </div>
               </div>
             </div>
+          </div>
+        </header>
 
-            {showEventForm && (
-              <form onSubmit={handleCreateEvent} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 mb-6 space-y-4">
-                <h3 className="font-bold text-lg text-gray-800 dark:text-white">New Event</h3>
-                <input type="text" placeholder="Title" value={eventForm.title}
-                  onChange={e => setEventForm({ ...eventForm, title: e.target.value })}
-                  className={inputClass} required />
-                <textarea placeholder="Description" value={eventForm.description}
-                  onChange={e => setEventForm({ ...eventForm, description: e.target.value })}
-                  className={inputClass} rows={3} />
-                <select value={eventForm.venue_id}
-                  onChange={e => setEventForm({ ...eventForm, venue_id: e.target.value })}
-                  className={inputClass} required>
-                  <option value="">Select Venue</option>
-                  {venues.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                </select>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Start Time</label>
-                    <input type="datetime-local" value={eventForm.start_time}
-                      onChange={e => setEventForm({ ...eventForm, start_time: e.target.value })}
-                      className={inputClass} required />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">End Time</label>
-                    <input type="datetime-local" value={eventForm.end_time}
-                      onChange={e => setEventForm({ ...eventForm, end_time: e.target.value })}
-                      className={inputClass} required />
-                  </div>
-                </div>
-                <input type="number" placeholder="Max Attendees" value={eventForm.max_attendees}
-                  onChange={e => setEventForm({ ...eventForm, max_attendees: e.target.value })}
-                  className={inputClass} required />
-                <div>
-                  <label className="text-sm text-gray-600 dark:text-gray-400 font-semibold block mb-1">Event Poster (Optional)</label>
-                  <input type="file" accept="image/*"
-                    onChange={e => {
-                      const file = e.target.files[0];
-                      if (file) { setPosterFile(file); setPosterPreview(URL.createObjectURL(file)); }
-                    }}
-                    className="w-full border dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-700" />
-                  {posterPreview && (
-                    <div className="mt-2 relative">
-                      <img src={posterPreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
-                      <button type="button"
-                        onClick={() => { setPosterFile(null); setPosterPreview(null); }}
-                        className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-lg">
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-3">
-                  <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700">Create Event</button>
-                  <button type="button" onClick={() => setShowEventForm(false)} className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold">Cancel</button>
-                </div>
-              </form>
-            )}
-
-            <div className="space-y-4">
-              {filteredEvents.length === 0 ? (
-                <p className="text-center py-10 text-gray-400">No events found.</p>
-              ) : (
-                filteredEvents.map(event => (
-                  <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6">
-                    {event.poster_url && (
-                      <img src={event.poster_url?.startsWith('http') ? event.poster_url : `${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${event.poster_url}`} alt={event.title}
-                        className="w-full h-40 object-cover rounded-lg mb-3" />
-                    )}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-gray-800 dark:text-white">{event.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(event.start_time).toLocaleString()} • {event.venue_name || 'No venue'}
-                        </p>
-                        <span className={statusBadge(event.status)}>{event.status}</span>
-                      </div>
-                      <div className="flex flex-row sm:flex-col gap-2 shrink-0">
-                        {event.status !== 'published' && (
-                          <button onClick={() => handlePublish(event.id)}
-                            className="flex-1 sm:flex-none bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
-                            Publish
-                          </button>
-                        )}
-                        <button onClick={() => handleDeleteEvent(event.id)}
-                          className="flex-1 sm:flex-none bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600">
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+        {/* Dashboard Body */}
+        <div className="flex-1 overflow-y-auto px-10 py-10">
+          
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <h2 className="text-5xl font-black text-gray-900 leading-none mb-2" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>
+                {activeTab === 'events' ? 'Event Management' : activeTab === 'venues' ? 'Venue Registry' : 'Booking Requests'}
+              </h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Administrative Overwatch</p>
+            </div>
+            <div className="flex gap-4">
+               {activeTab === 'events' && <button className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:opacity-90 transition-all active:scale-95">Add Event</button>}
+               {activeTab === 'venues' && <button className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:opacity-90 transition-all active:scale-95">Add Venue</button>}
             </div>
           </div>
-        )}
 
-        {/* ── VENUES TAB ── */}
-        {activeTab === 'venues' && (
-          <div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Venues</h2>
-              <div className="flex items-center gap-3">
-                <SearchBar value={venueSearch} onChange={setVenueSearch} placeholder="Search venues..." />
-                <button onClick={() => setShowVenueForm(!showVenueForm)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 whitespace-nowrap">
-                  + Add Venue
-                </button>
+          {/* Dynamic Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {activeTab === 'events' && events.map((event, idx) => (
+              <div key={event.id} className="admin-card bg-white rounded-[32px] overflow-hidden shadow-soft border border-gray-100/50 flex flex-col hover:-translate-y-1 transition-all duration-300">
+                <div className="h-40 bg-gray-50 relative border-b border-gray-50 overflow-hidden">
+                  {event.poster_url ? <img src={event.poster_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-200 font-black text-4xl uppercase" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>No Poster</div>}
+                  <div className="absolute top-4 right-4">
+                    <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border ${event.status === 'published' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                      {event.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-black text-gray-900 mb-4 truncate" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{event.title}</h3>
+                  <div className="space-y-2 mb-8 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                    <div className="flex items-center gap-3"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {event.venue_name || 'TBA'}</div>
+                    <div className="flex items-center gap-3"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> {new Date(event.start_time).toLocaleDateString()}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-gray-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Edit</button>
+                    <button className="flex-1 bg-red-50 text-red-600 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all">Delete</button>
+                  </div>
+                </div>
               </div>
-            </div>
-            {showVenueForm && (
-              <form onSubmit={handleCreateVenue} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 mb-6 space-y-4">
-                <h3 className="font-bold text-lg text-gray-800 dark:text-white">New Venue</h3>
-                <input type="text" placeholder="Venue Name" value={venueForm.name}
-                  onChange={e => setVenueForm({ ...venueForm, name: e.target.value })} className={inputClass} required />
-                <input type="number" placeholder="Capacity" value={venueForm.capacity}
-                  onChange={e => setVenueForm({ ...venueForm, capacity: e.target.value })} className={inputClass} required />
-                <input type="text" placeholder="Location" value={venueForm.location}
-                  onChange={e => setVenueForm({ ...venueForm, location: e.target.value })} className={inputClass} required />
-                <div className="flex gap-3">
-                  <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700">Add Venue</button>
-                  <button type="button" onClick={() => setShowVenueForm(false)} className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold">Cancel</button>
-                </div>
-              </form>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredVenues.length === 0 ? (
-                <p className="text-center py-10 text-gray-400 col-span-2">No venues found.</p>
-              ) : (
-                filteredVenues.map(venue => (
-                  <div key={venue.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-                    <h3 className="font-bold text-gray-800 dark:text-white">{venue.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">📍 {venue.location}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">👥 Capacity: {venue.capacity}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+            ))}
 
-        {/* ── BOOKINGS TAB ── */}
-        {activeTab === 'bookings' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Venue Booking Requests</h2>
-            <div className="space-y-4">
-              {bookings.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400">No booking requests yet.</p>
-              ) : (
-                bookings.map(booking => (
-                  <div key={booking.id} className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-gray-800 dark:text-white">{booking.venue_name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">By: {booking.user_name} | {new Date(booking.start_time).toLocaleString()}</p>
-                      <span className={statusBadge(booking.status)}>{booking.status}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 shrink-0">
-                      {booking.status === 'pending' && (
-                        <>
-                          <button onClick={() => handleBookingStatus(booking.id, 'approved')}
-                            className="flex-1 sm:flex-none bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
-                            Approve
-                          </button>
-                          <button onClick={() => handleBookingStatus(booking.id, 'rejected')}
-                            className="flex-1 sm:flex-none bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600">
-                            Reject
-                          </button>
-                        </>
-                      )}
-                      <button onClick={() => handleDeleteBooking(booking.id)}
-                        className="flex-1 sm:flex-none bg-gray-700 dark:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800">
-                        Delete
-                      </button>
+            {activeTab === 'venues' && venues.map(venue => (
+              <div key={venue.id} className="admin-card bg-white rounded-[32px] p-8 shadow-soft border border-gray-100/50 hover:-translate-y-1 transition-all duration-300">
+                <h3 className="text-3xl font-black text-gray-900 mb-2" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{venue.name}</h3>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-6">{venue.location}</p>
+                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-50">
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Capacity</p>
+                    <p className="text-2xl font-black text-gray-900" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{venue.capacity}</p>
+                  </div>
+                  <div className="flex items-end justify-end">
+                    <button className="text-blue-600 font-black text-[10px] uppercase tracking-widest hover:underline">Manage</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {activeTab === 'bookings' && bookings.map(booking => (
+              <div key={booking.id} className="admin-card bg-white rounded-[32px] p-8 shadow-soft border border-gray-100/50 hover:-translate-y-1 transition-all duration-300">
+                <div className="flex justify-between items-start mb-6">
+                  <h3 className="text-2xl font-black text-gray-900 leading-tight truncate" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{booking.venue_name}</h3>
+                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${booking.status === 'pending' ? 'bg-yellow-50 text-yellow-600' : 'bg-gray-50 text-gray-400'}`}>{booking.status}</span>
+                </div>
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px]">{booking.user_name?.charAt(0)}</div>
+                    <div>
+                      <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest leading-none">{booking.user_name}</p>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Faculty Request</p>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                  <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {new Date(booking.start_time).toLocaleDateString()}
+                  </p>
+                </div>
+                {booking.status === 'pending' && (
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-green-600 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Approve</button>
+                    <button className="flex-1 bg-red-600 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all">Reject</button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+
+          {events.length === 0 && activeTab === 'events' && (
+             <div className="text-center py-32 bg-white rounded-[40px] border-2 border-dashed border-gray-100">
+               <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-sm">No Active Deployments</p>
+             </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

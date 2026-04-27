@@ -1,5 +1,39 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
+import gsap from 'gsap';
+
+const BLUE = '#1a73e8';
+
+// SVG Icons
+const IconLocation = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+const IconCalendar = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const IconClock = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+
+const IconDownload = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+);
+
+const IconX = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
 
 const QRModal = ({ event, onClose }) => {
   const [qrData, setQrData] = useState(null);
@@ -8,6 +42,7 @@ const QRModal = ({ event, onClose }) => {
 
   useEffect(() => {
     fetchQR();
+    gsap.from('.modal-content', { scale: 0.9, opacity: 0, duration: 0.4, ease: 'back.out(1.7)' });
   }, []);
 
   const fetchQR = async () => {
@@ -29,43 +64,48 @@ const QRModal = ({ event, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">
+      <div className="modal-content bg-white rounded-[32px] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20">
 
         {/* Header */}
-        <div className="bg-blue-600 px-6 py-4 text-white text-center">
-          <p className="text-xs uppercase tracking-widest mb-1 opacity-80">EveSphere</p>
-          <h2 className="text-xl font-bold">{event.title}</h2>
-          <span className="inline-block mt-2 bg-green-400 text-green-900 text-xs font-bold px-3 py-1 rounded-full">
-            ✓ Registered
+        <div className="px-8 py-6 text-center" style={{ backgroundColor: BLUE }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-white/70">EveSphere Ticket</p>
+          <h2 className="text-2xl font-black text-white leading-tight mb-3" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>
+            {event.title}
+          </h2>
+          <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/10">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Registered
           </span>
         </div>
 
         {/* Event Details */}
-        <div className="px-6 py-4 border-b border-dashed border-gray-200 dark:border-gray-600">
+        <div className="px-8 py-6 border-b border-dashed border-gray-100">
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${BLUE} transparent transparent transparent` }} />
             </div>
           ) : error ? (
-            <p className="text-red-500 text-sm text-center py-4">❌ {error}</p>
+            <div className="text-center py-4">
+              <div className="text-red-500 mb-2">
+                <svg className="mx-auto" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <p className="text-red-500 text-sm font-medium">{error}</p>
+            </div>
           ) : qrData ? (
-            <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
-              <div className="flex items-center gap-2">
-                <span>📍</span>
-                <span>{qrData.venue || 'TBA'}</span>
+            <div className="text-[13px] text-gray-500 space-y-3">
+              <div className="flex items-center gap-3 font-semibold text-gray-700">
+                <IconLocation /> {qrData.venue || 'TBA'}
               </div>
-              <div className="flex items-center gap-2">
-                <span>📅</span>
-                <span>{new Date(qrData.start_time).toLocaleDateString('en-US', {
+              <div className="flex items-center gap-3 font-semibold text-gray-700">
+                <IconCalendar /> {new Date(qrData.start_time).toLocaleDateString('en-US', {
                   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                })}</span>
+                })}
               </div>
-              <div className="flex items-center gap-2">
-                <span>🕐</span>
-                <span>{new Date(qrData.start_time).toLocaleTimeString('en-US', {
+              <div className="flex items-center gap-3 font-semibold text-gray-700">
+                <IconClock /> {new Date(qrData.start_time).toLocaleTimeString('en-US', {
                   hour: '2-digit', minute: '2-digit'
-                })}</span>
+                })}
               </div>
             </div>
           ) : null}
@@ -73,39 +113,37 @@ const QRModal = ({ event, onClose }) => {
 
         {/* QR Code */}
         {!loading && !error && qrData && (
-          <div className="px-6 py-4 flex flex-col items-center">
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 uppercase tracking-wider">
-              Show at entrance
+          <div className="px-8 py-6 flex flex-col items-center">
+            <p className="text-[10px] font-black text-gray-400 mb-4 uppercase tracking-[0.2em]">
+              Entrance Pass
             </p>
-            <div className="bg-white p-3 rounded-xl shadow-inner border border-gray-100">
+            <div className="bg-white p-4 rounded-3xl shadow-inner border border-gray-50">
               <img
                 src={qrData.qr_code}
                 alt="QR Code"
-                className="w-48 h-48"
+                className="w-44 h-44"
               />
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-              Scan to verify registration
+            <p className="text-[10px] font-bold text-gray-400 mt-4 text-center">
+              Present this code at the event check-in
             </p>
           </div>
         )}
 
-        {/* Dashed divider */}
-        <div className="mx-6 border-t border-dashed border-gray-200 dark:border-gray-600" />
-
         {/* Actions */}
-        <div className="px-6 py-4 space-y-2">
+        <div className="px-8 py-6 pt-2 space-y-3">
           {!loading && !error && qrData && (
             <button
               onClick={handleDownload}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="w-full flex items-center justify-center gap-2 text-white py-3.5 rounded-2xl font-bold text-sm hover:opacity-90 transition-all active:scale-95"
+              style={{ backgroundColor: BLUE }}
             >
-              ⬇️ Download Ticket
+              <IconDownload /> Download Ticket
             </button>
           )}
           <button
             onClick={onClose}
-            className="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+            className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
           >
             Close
           </button>

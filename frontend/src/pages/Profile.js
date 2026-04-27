@@ -1,420 +1,165 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import toast from 'react-hot-toast';
-import NotificationBell from '../components/NotificationBell';
-import DarkModeToggle from '../components/DarkModeToggle';
+import gsap from 'gsap';
+
+const BLUE = '#1a73e8';
+const RED = '#ea4335';
+
+// SVG Icons
+const IconDashboard = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </svg>
+);
+
+const IconUser = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const IconSettings = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+);
+
+const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
+  <div onClick={onClick} className={`flex flex-col items-center gap-1.5 py-4 cursor-pointer transition-all ${active ? 'text-blue-600 bg-blue-50/50' : 'text-gray-400 hover:text-gray-600'}`}>
+    <Icon />
+    <span className="text-[10px] font-black uppercase tracking-wider">{label}</span>
+  </div>
+);
 
 const Profile = () => {
   const { user, login, token, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    department: '',
-    branch: '',
-    section: '',
-    uid: '',
-    designation: '',
-    employee_id: '',
-    office: '',
-    bio: '',
-  });
+  const container = useRef(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useEffect(() => { fetchProfile(); }, []);
 
   const fetchProfile = async () => {
     try {
       const res = await API.get('/profile/me');
       setProfile(res.data);
-      setForm({
-        name: res.data.name || '',
-        phone: res.data.phone || '',
-        department: res.data.department || '',
-        branch: res.data.branch || '',
-        section: res.data.section || '',
-        uid: res.data.uid || '',
-        designation: res.data.designation || '',
-        employee_id: res.data.employee_id || '',
-        office: res.data.office || '',
-        bio: res.data.bio || '',
-      });
-    } catch (err) {
-      toast.error('Failed to load profile');
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to load profile'); }
+    finally { setLoading(false); }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await API.put('/profile/me', form);
-      setProfile(res.data);
-      login(res.data, token);
-      setEditing(false);
-      toast.success('Profile updated!');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setSaving(false);
+  useEffect(() => {
+    if (!loading) {
+      const ctx = gsap.context(() => {
+        gsap.from('.sidebar', { x: -80, opacity: 0, duration: 0.6, ease: 'power3.out' });
+        gsap.from('.top-nav', { y: -60, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.1 });
+        gsap.from('.profile-card', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.3 });
+      }, container);
+      return () => ctx.revert();
     }
-  };
+  }, [loading]);
 
-  const handleAvatarUpload = async () => {
-    if (!avatarFile) return;
-    const formData = new FormData();
-    formData.append('avatar', avatarFile);
-    try {
-      const res = await API.put('/profile/me/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setProfile(res.data);
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      toast.success('Avatar updated!');
-    } catch (err) {
-      toast.error('Failed to upload avatar');
-    }
-  };
-
-  const goBack = () => {
-    if (user?.role === 'admin') navigate('/admin');
-    else if (user?.role === 'faculty') navigate('/faculty');
-    else navigate('/student');
-  };
-
-  const inputClass = "w-full border dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1";
-
-  // Role-specific profile detail fields
-  const getProfileFields = () => {
-    const common = [
-      { label: 'Full Name', value: profile?.name, icon: '👤' },
-      { label: 'Email', value: profile?.email, icon: '📧' },
-      { label: 'Phone', value: profile?.phone || 'Not set', icon: '📱' },
-      { label: 'Department', value: profile?.department || 'Not set', icon: '🏛️' },
-      { label: 'Role', value: profile?.role, icon: '🎭' },
-      { label: 'Member Since', value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '—', icon: '📅' },
-    ];
-
-    if (profile?.role === 'student') {
-      return [
-        ...common,
-        { label: 'UID / Roll No', value: profile?.uid || 'Not set', icon: '🪪' },
-        { label: 'Branch', value: profile?.branch || 'Not set', icon: '📚' },
-        { label: 'Section', value: profile?.section || 'Not set', icon: '🔤' },
-      ];
-    }
-
-    if (profile?.role === 'faculty') {
-      return [
-        ...common,
-        { label: 'Employee ID', value: profile?.employee_id || 'Not set', icon: '🪪' },
-        { label: 'Designation', value: profile?.designation || 'Not set', icon: '💼' },
-        { label: 'Office', value: profile?.office || 'Not set', icon: '🏢' },
-      ];
-    }
-
-    if (profile?.role === 'admin') {
-      return [
-        ...common,
-        { label: 'Employee ID', value: profile?.employee_id || 'Not set', icon: '🪪' },
-        { label: 'Designation', value: profile?.designation || 'Not set', icon: '💼' },
-      ];
-    }
-
-    return common;
-  };
-
-  // Role-specific edit form fields
-  const renderRoleFields = () => {
-    if (profile?.role === 'student') {
-      return (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>UID / Roll Number</label>
-              <input type="text" placeholder="e.g. 22BCS001" value={form.uid}
-                onChange={e => setForm({ ...form, uid: e.target.value })}
-                className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Branch</label>
-              <input type="text" placeholder="e.g. B.Tech CSE" value={form.branch}
-                onChange={e => setForm({ ...form, branch: e.target.value })}
-                className={inputClass} />
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Section</label>
-            <input type="text" placeholder="e.g. A / B / C" value={form.section}
-              onChange={e => setForm({ ...form, section: e.target.value })}
-              className={inputClass} />
-          </div>
-        </>
-      );
-    }
-
-    if (profile?.role === 'faculty') {
-      return (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Employee ID</label>
-              <input type="text" placeholder="e.g. FAC001" value={form.employee_id}
-                onChange={e => setForm({ ...form, employee_id: e.target.value })}
-                className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Designation</label>
-              <input type="text" placeholder="e.g. Assistant Professor" value={form.designation}
-                onChange={e => setForm({ ...form, designation: e.target.value })}
-                className={inputClass} />
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Office</label>
-            <input type="text" placeholder="e.g. Room 204, Block B" value={form.office}
-              onChange={e => setForm({ ...form, office: e.target.value })}
-              className={inputClass} />
-          </div>
-        </>
-      );
-    }
-
-    if (profile?.role === 'admin') {
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Employee ID</label>
-            <input type="text" placeholder="e.g. ADM001" value={form.employee_id}
-              onChange={e => setForm({ ...form, employee_id: e.target.value })}
-              className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Designation</label>
-            <input type="text" placeholder="e.g. Campus Administrator" value={form.designation}
-              onChange={e => setForm({ ...form, designation: e.target.value })}
-              className={inputClass} />
-          </div>
-        </div>
-      );
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${BLUE} transparent transparent transparent` }} />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <nav className="bg-blue-700 dark:bg-gray-800 text-white px-4 sm:px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={goBack}
-              className="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm font-semibold transition"
-            >
-              ← Back
-            </button>
-            <h1 className="text-xl font-bold">My Profile</h1>
-          </div>
-          {/* Desktop nav */}
-          <div className="hidden sm:flex items-center gap-4">
-            <DarkModeToggle />
-            <NotificationBell />
-            <button onClick={logout} className="bg-white text-blue-700 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
-              Logout
-            </button>
-          </div>
-          {/* Mobile: bell + hamburger */}
-          <div className="flex sm:hidden items-center gap-2">
-            <NotificationBell />
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? '✕' : '☰'}
-            </button>
+    <div ref={container} className="min-h-screen bg-[#f8f9fc] flex font-sans antialiased text-gray-900">
+      
+      {/* Sidebar */}
+      <aside className="sidebar w-20 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col items-center py-8 z-50 sticky top-0 h-screen">
+        <div className="mb-12">
+          <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           </div>
         </div>
-        {/* Mobile dropdown */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden mt-3 flex flex-col gap-2 pb-2">
-            <div className="flex items-center gap-2">
-              <DarkModeToggle />
-              <span className="text-sm">Dark Mode</span>
-            </div>
-            <button onClick={logout} className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 text-left">
-              Logout
-            </button>
-          </div>
-        )}
-      </nav>
-
-      <div className="max-w-3xl mx-auto p-4 sm:p-6">
-
-        {/* Profile Header Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
-                ) : profile?.avatar_url ? (
-                  <img src={profile.avatar_url?.startsWith('http') ? profile.avatar_url : `${process.env.REACT_APP_BASE_URL || 'http://localhost:5000'}${profile.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-bold text-blue-600 dark:text-blue-300">
-                    {profile?.name?.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <label className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-blue-700 text-xs">
-                ✏️
-                <input type="file" accept="image/*" className="hidden"
-                  onChange={e => {
-                    const file = e.target.files[0];
-                    if (file) { setAvatarFile(file); setAvatarPreview(URL.createObjectURL(file)); }
-                  }}
-                />
-              </label>
-            </div>
-
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{profile?.name}</h2>
-              <p className="text-gray-500 dark:text-gray-400">{profile?.email}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${
-                  profile?.role === 'admin' ? 'bg-red-100 text-red-700' :
-                  profile?.role === 'faculty' ? 'bg-purple-100 text-purple-700' :
-                  'bg-blue-100 text-blue-700'
-                }`}>
-                  {profile?.role}
-                </span>
-                {profile?.role === 'student' && profile?.uid && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                    UID: {profile.uid}
-                  </span>
-                )}
-                {(profile?.role === 'faculty' || profile?.role === 'admin') && profile?.designation && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                    {profile.designation}
-                  </span>
-                )}
-              </div>
-              {profile?.bio && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">"{profile.bio}"</p>
-              )}
-            </div>
-
-            <button
-              onClick={() => setEditing(!editing)}
-              className={`mt-2 sm:mt-0 px-4 py-2 rounded-lg text-sm font-semibold transition self-start ${
-                editing
-                  ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {editing ? 'Cancel' : '✏️ Edit Profile'}
-            </button>
-          </div>
-
-          {avatarFile && (
-            <div className="mt-4 flex items-center gap-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400">New avatar selected</p>
-              <button onClick={handleAvatarUpload}
-                className="bg-blue-600 text-white px-4 py-1 rounded-lg text-sm font-semibold hover:bg-blue-700">
-                Upload Avatar
-              </button>
-              <button onClick={() => { setAvatarFile(null); setAvatarPreview(null); }}
-                className="text-red-500 text-sm hover:underline">
-                Cancel
-              </button>
-            </div>
-          )}
+        <div className="flex-1 w-full space-y-2">
+          <SidebarItem icon={IconDashboard} label="Home" onClick={() => navigate(-1)} />
+          <SidebarItem icon={IconUser} label="Profile" active />
+          <SidebarItem icon={IconSettings} label="Account" />
         </div>
+      </aside>
 
-        {/* Edit Form */}
-        {editing && (
-          <form onSubmit={handleSave} className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6 mb-6 space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Edit Profile</h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Full Name</label>
-                <input type="text" value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  className={inputClass} required />
-              </div>
-              <div>
-                <label className={labelClass}>Phone Number</label>
-                <input type="text" placeholder="+91 XXXXX XXXXX" value={form.phone}
-                  onChange={e => setForm({ ...form, phone: e.target.value })}
-                  className={inputClass} />
-              </div>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0">
+        
+        {/* Top Navbar */}
+        <header className="top-nav h-20 bg-white/70 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-40">
+          <div className="flex items-center gap-8 flex-1">
+            <h1 className="text-3xl font-black tracking-tight" style={{ fontFamily: '"Big Shoulders Display", sans-serif', color: '#111' }}>Identity Console</h1>
+            <div className="hidden lg:flex items-center gap-2 bg-gray-50 rounded-full px-4 py-1.5 border border-gray-100">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Authenticated: {user?.role}</span>
             </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <button onClick={() => logout()} className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:underline transition-all">Sign Out</button>
+          </div>
+        </header>
 
-            <div>
-              <label className={labelClass}>Department</label>
-              <input type="text" placeholder="e.g. Computer Science" value={form.department}
-                onChange={e => setForm({ ...form, department: e.target.value })}
-                className={inputClass} />
-            </div>
+        {/* Profile Body */}
+        <div className="flex-1 overflow-y-auto px-10 py-10 max-w-4xl">
+          
+          <div className="mb-12">
+            <h2 className="text-6xl font-black text-gray-900 leading-none mb-2" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>
+              Your Profile
+            </h2>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Manage your EveSphere identity</p>
+          </div>
 
-            {/* Role specific fields */}
-            {renderRoleFields()}
+          <div className="profile-card bg-white rounded-[40px] p-12 shadow-soft border border-gray-100/50 flex flex-col items-center sm:items-start sm:flex-row gap-12 mb-12">
+             <div className="relative group">
+                <div className="w-48 h-48 rounded-[32px] bg-gray-50 overflow-hidden border-4 border-white shadow-inner flex items-center justify-center">
+                   {profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <div className="text-7xl font-black text-blue-600 uppercase" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{profile?.name?.charAt(0)}</div>}
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg cursor-pointer hover:scale-110 transition-transform">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+             </div>
+             <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-5xl font-black text-gray-900 leading-none mb-4" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{profile?.name}</h3>
+                <div className="flex flex-wrap justify-center sm:justify-start gap-3 mb-8">
+                   <span className="text-[10px] font-black px-4 py-1.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 uppercase tracking-widest">{profile?.role}</span>
+                   <span className="text-[10px] font-black px-4 py-1.5 rounded-xl bg-gray-50 text-gray-400 border border-gray-100 uppercase tracking-widest">{profile?.department || 'General'}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
+                   <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
+                      <p className="font-bold text-gray-800">{profile?.email}</p>
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Account Status</p>
+                      <p className="font-bold text-green-500 uppercase text-xs">Verified</p>
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Member Since</p>
+                      <p className="font-bold text-gray-800">{new Date(profile?.created_at).toLocaleDateString([], {month:'long', year:'numeric'})}</p>
+                   </div>
+                </div>
+             </div>
+          </div>
 
-            <div>
-              <label className={labelClass}>Bio</label>
-              <textarea placeholder="Tell something about yourself..." value={form.bio}
-                onChange={e => setForm({ ...form, bio: e.target.value })}
-                className={inputClass} rows={3} />
-            </div>
-
-            <div className="flex gap-3">
-              <button type="submit" disabled={saving}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50">
-                {saving ? 'Saving...' : '💾 Save Changes'}
-              </button>
-              <button type="button" onClick={() => setEditing(false)}
-                className="flex-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold">
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Profile Details Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 sm:p-6">
-          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Profile Details</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {getProfileFields().map(({ label, value, icon }) => (
-              <div key={label} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{icon} {label}</p>
-                <p className="font-semibold text-gray-800 dark:text-white text-sm">{value}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="profile-card bg-white rounded-[32px] p-8 shadow-soft border border-gray-100/50">
+                <h4 className="text-2xl font-black mb-6" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Security Settings</h4>
+                <div className="space-y-4">
+                   <button className="w-full bg-gray-50 text-gray-900 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">Change Password</button>
+                   <button className="w-full bg-gray-50 text-gray-900 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">Two-Factor Auth</button>
+                </div>
+             </div>
+             <div className="profile-card bg-white rounded-[32px] p-8 shadow-soft border border-gray-100/50">
+                <h4 className="text-2xl font-black mb-6" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Danger Zone</h4>
+                <div className="space-y-4">
+                   <button className="w-full bg-red-50 text-red-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all">Deactivate Account</button>
+                </div>
+             </div>
           </div>
         </div>
-
-      </div>
+      </main>
     </div>
   );
 };
