@@ -38,10 +38,10 @@
   body {
     @apply antialiased text-gray-900;
     font-family: 'Inter', sans-serif;
-    background-color: #f0f2ff;
+    background-color: #f0f4ff;
     background-image:
-      linear-gradient(rgba(99, 102, 241, 0.18) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99, 102, 241, 0.18) 1px, transparent 1px);
+      linear-gradient(rgba(26, 115, 232, 0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26, 115, 232, 0.25) 1px, transparent 1px);
     background-size: 60px 60px;
   }
 
