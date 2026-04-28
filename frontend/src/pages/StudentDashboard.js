@@ -7,6 +7,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import QRModal from '../components/QRModal';
 import EmptyState from '../components/ui/EmptyState';
 import { FullPageSpinner } from '../components/ui/Spinner';
+import { fmtDateTime } from '../utils/time';
 
 const BLUE = '#1a73e8';
 const GREEN = '#34a853';
@@ -69,7 +70,7 @@ const EventCard = ({ event, idx, registered, past, onRegister, onCancel, onViewT
           </div>
           <div className="flex items-center gap-2">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+            {fmtDateTime(event.start_time)}
           </div>
           {event.organizer_name && (
             <div className="flex items-center gap-2">
@@ -121,7 +122,7 @@ const RegRow = ({ reg, idx, onViewTicket, onCancel }) => (
       <h3 className="text-xl font-black text-gray-900 mb-1.5 font-display truncate">{reg.event_title}</h3>
       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
         <span className="flex items-center gap-1.5">📍 {reg.venue_name || 'TBA'}</span>
-        <span className="flex items-center gap-1.5">📅 {new Date(reg.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+        <span className="flex items-center gap-1.5">📅 {fmtDateTime(reg.start_time)}</span>
         <span className={`px-2.5 py-0.5 rounded-full text-[9px] ${reg.status === 'attended' ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
           {reg.status}
         </span>

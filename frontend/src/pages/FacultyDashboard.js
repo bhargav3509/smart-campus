@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import EmptyState from '../components/ui/EmptyState';
 import { FullPageSpinner } from '../components/ui/Spinner';
+import { fmtDateTime, fmtTime } from '../utils/time';
 
 const BLUE  = '#1a73e8';
 const GREEN = '#34a853';
@@ -226,7 +227,7 @@ const FacultyDashboard = () => {
                       <p className="text-xs text-gray-400 line-clamp-2 mb-4 font-medium">{event.description}</p>
                       <div className="mt-auto space-y-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4 border-t border-gray-50">
                         <p>📍 {event.venue_name || 'No venue'}</p>
-                        <p>📅 {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                        <p>📅 {fmtDateTime(event.start_time)}</p>
                       </div>
                     </div>
                   </div>
@@ -250,8 +251,8 @@ const FacultyDashboard = () => {
                         <StatusBadge status={b.status} />
                       </div>
                       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        <span>📅 {new Date(b.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                        <span>→ {new Date(b.end_time).toLocaleString([], { timeStyle: 'short' })}</span>
+                        <span>📅 {fmtDateTime(b.start_time)}</span>
+                        <span>→ {fmtTime(b.end_time)}</span>
                       </div>
                     </div>
                     {b.status === 'pending' && (

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import EmptyState from '../components/ui/EmptyState';
 import { FullPageSpinner } from '../components/ui/Spinner';
+import { fmtDateTime, fmtTime } from '../utils/time';
 
 const BLUE   = '#1a73e8';
 const GREEN  = '#34a853';
@@ -250,7 +251,7 @@ const AdminDashboard = () => {
                       <h3 className="text-xl font-black text-gray-900 mb-1.5 font-display line-clamp-2">{event.title}</h3>
                       <div className="space-y-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-5">
                         <p>📍 {event.venue_name || 'No venue'}</p>
-                        <p>📅 {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                        <p>📅 {fmtDateTime(event.start_time)}</p>
                         <p>👤 {event.organizer_name || 'Unknown'}</p>
                       </div>
                       <div className="mt-auto flex gap-2">
@@ -313,8 +314,8 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         <span>👤 {b.user_name}</span>
-                        <span>📅 {new Date(b.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                        <span>→ {new Date(b.end_time).toLocaleString([], { timeStyle: 'short' })}</span>
+                        <span>📅 {fmtDateTime(b.start_time)}</span>
+                        <span>→ {fmtTime(b.end_time)}</span>
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">

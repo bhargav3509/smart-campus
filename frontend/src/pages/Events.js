@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import EmptyState from '../components/ui/EmptyState';
 import { FullPageSpinner } from '../components/ui/Spinner';
+import { fmtDate } from '../utils/time';
 
 const BLUE   = '#1a73e8';
 const GREEN  = '#34a853';
@@ -129,7 +130,7 @@ const Events = () => {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        {new Date(event.start_time).toLocaleDateString([], { dateStyle: 'medium' })}
+                        {fmtDate(event.start_time)}
                       </div>
                     </div>
                     <div className="mt-auto">
