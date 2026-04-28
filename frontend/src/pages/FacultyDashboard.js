@@ -56,8 +56,20 @@ const FacultyDashboard = () => {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    // Fix: attach local timezone offset so backend stores correct UTC
+    const toLocalISO = (val) => {
+      if (!val) return val;
+      const offset = -new Date().getTimezoneOffset();
+      const sign = offset >= 0 ? '+' : '-';
+      const pad = n => String(Math.floor(Math.abs(n))).padStart(2, '0');
+      return `${val}:00${sign}${pad(offset / 60)}:${pad(offset % 60)}`;
+    };
     const fd = new FormData();
-    Object.entries(eventForm).forEach(([k, v]) => { if (v) fd.append(k, v); });
+    Object.entries(eventForm).forEach(([k, v]) => {
+      if (!v) return;
+      if (k === 'start_time' || k === 'end_time') fd.append(k, toLocalISO(v));
+      else fd.append(k, v);
+    });
     if (posterFile) fd.append('poster', posterFile);
     try { await API.post('/events', fd); toast.success('Event submitted for approval'); setShowEventForm(false); fetchData(); }
     catch { toast.error('Submission failed'); }
