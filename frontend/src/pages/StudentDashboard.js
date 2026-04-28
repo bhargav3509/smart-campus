@@ -152,7 +152,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [qrEvent, setQrEvent] = useState(null);
   const [activeTab, setActiveTab] = useState('events');
-  const [sortOption, setSortOption] = useState('upcoming');
+  const [sortOption, setSortOption] = useState('ended_last');
 
   const fetchData = useCallback(async () => {
     try {
@@ -190,15 +190,15 @@ const StudentDashboard = () => {
   const isPast = (t) => new Date() > new Date(t);
 
   const sortedEvents = [...events].sort((a, b) => {
-    if (sortOption === 'newest')    return new Date(b.created_at) - new Date(a.created_at);
-    if (sortOption === 'ended_last') {
-      const aPast = new Date() > new Date(a.end_time);
-      const bPast = new Date() > new Date(b.end_time);
-      if (aPast && !bPast) return 1;   // a is past → push to end
-      if (!aPast && bPast) return -1;  // b is past → push to end
-      return new Date(a.start_time) - new Date(b.start_time); // both same → sort by start
-    }
-    return new Date(a.start_time) - new Date(b.start_time); // upcoming
+    const aPast = new Date() > new Date(a.end_time);
+    const bPast = new Date() > new Date(b.end_time);
+
+    // Always push ended events to bottom regardless of sort mode
+    if (aPast && !bPast) return 1;
+    if (!aPast && bPast) return -1;
+
+    if (sortOption === 'newest') return new Date(b.created_at) - new Date(a.created_at);
+    return new Date(a.start_time) - new Date(b.start_time); // upcoming / ended_last
   });
 
   if (loading) return <FullPageSpinner />;
@@ -212,11 +212,11 @@ const StudentDashboard = () => {
   ];
 
   const headerActions = activeTab === 'events' ? (
-    <select value={sortOption} onChange={e => setSortOption(e.target.value)}
+      <select value={sortOption} onChange={e => setSortOption(e.target.value)}
       className="bg-white border border-gray-100 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 shadow-soft focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
-      <option value="upcoming">Upcoming First</option>
+      <option value="ended_last">Active First</option>
+      <option value="upcoming">By Start Time</option>
       <option value="newest">Newest First</option>
-      <option value="ended_last">Ended Last</option>
     </select>
   ) : null;
 
