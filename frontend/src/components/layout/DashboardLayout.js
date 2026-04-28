@@ -50,7 +50,7 @@ const DashboardLayout = ({
     user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f0f11] flex font-sans antialiased text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="min-h-screen bg-transparent flex font-sans antialiased text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
       {/* ── Sidebar ── */}
       <aside
