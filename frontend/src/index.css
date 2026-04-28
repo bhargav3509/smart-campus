@@ -49,14 +49,12 @@
 
 /* ─── Utility classes ─── */
 @layer utilities {
-  /* Animation helpers — CSS-driven so they're immune to GSAP context revert */
   .animate-slide-up    { animation: slideUp    0.4s ease both; }
   .animate-slide-left  { animation: slideInLeft 0.5s ease both; }
   .animate-slide-down  { animation: slideDown  0.4s ease both; }
   .animate-fade-in     { animation: fadeIn     0.3s ease both; }
   .animate-scale-in    { animation: scaleIn    0.35s ease both; }
 
-  /* Staggered delay helpers */
   .delay-0   { animation-delay: 0ms; }
   .delay-50  { animation-delay: 50ms; }
   .delay-100 { animation-delay: 100ms; }
@@ -67,7 +65,6 @@
   .delay-400 { animation-delay: 400ms; }
   .delay-500 { animation-delay: 500ms; }
 
-  /* Skeleton loading */
   .skeleton {
     background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
     background-size: 200% 100%;
@@ -75,11 +72,9 @@
     border-radius: 12px;
   }
 
-  /* Text utilities */
   .font-display { font-family: 'Big Shoulders Display', sans-serif; }
-  .label-xs     { @apply text-[10px] font-black uppercase tracking-widest; }
+  .label-xs     { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
 
-  /* Glass effect */
   .glass {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(16px);
@@ -94,6 +89,9 @@
 ::-webkit-scrollbar-thumb    { background: #e5e7eb; border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
 
+.dark ::-webkit-scrollbar-thumb      { background: #3a3a42; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a54; }
+
 /* ─── Focus rings ─── */
 :focus-visible {
   outline: 2px solid #1a73e8;
@@ -102,8 +100,61 @@
 }
 
 /* ─── Toast overrides ─── */
-.react-hot-toast > div {
+.react-hot-toast div {
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 600;
 }
+
+/* ════════════════════════════════════════
+   DARK MODE OVERRIDES
+   Applied when html has class="dark"
+   ════════════════════════════════════════ */
+
+/* Main backgrounds */
+.dark body,
+.dark .bg-\[\#f8f9fc\] { background-color: #0f0f11 !important; }
+
+/* Surfaces */
+.dark .bg-white        { background-color: #1a1a1f !important; }
+.dark .bg-gray-50      { background-color: #222228 !important; }
+
+/* Borders */
+.dark .border-gray-100 { border-color: rgba(255,255,255,0.06) !important; }
+.dark .border-gray-200 { border-color: rgba(255,255,255,0.09) !important; }
+.dark .border-gray-50  { border-color: rgba(255,255,255,0.04) !important; }
+.dark .border-dashed   { border-color: rgba(255,255,255,0.10) !important; }
+
+/* Text */
+.dark .text-gray-900   { color: #f3f4f6 !important; }
+.dark .text-gray-800   { color: #e5e7eb !important; }
+.dark .text-gray-700   { color: #d1d5db !important; }
+.dark .text-gray-600   { color: #9ca3af !important; }
+
+/* Shadows */
+.dark .shadow-soft     { box-shadow: 0 4px 20px rgba(0,0,0,0.4)  !important; }
+.dark .shadow-soft-lg  { box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important; }
+
+/* Form inputs */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #111114 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #f3f4f6 !important;
+  color-scheme: dark;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #6b7280 !important; }
+
+/* Tinted utility backgrounds */
+.dark .bg-blue-50    { background-color: rgba(26,115,232,0.12) !important; }
+.dark .bg-green-50   { background-color: rgba(52,168,83,0.12)  !important; }
+.dark .bg-red-50     { background-color: rgba(234,67,53,0.12)  !important; }
+.dark .bg-green-100  { background-color: rgba(52,168,83,0.12)  !important; }
+.dark .bg-yellow-100 { background-color: rgba(251,188,5,0.12)  !important; }
+.dark .bg-red-100    { background-color: rgba(234,67,53,0.12)  !important; }
+.dark .bg-gray-100   { background-color: #2a2a30 !important; }
+
+/* Table rows */
+.dark tr:hover { background-color: rgba(255,255,255,0.03) !important; }
