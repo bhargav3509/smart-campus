@@ -81,7 +81,7 @@ const AdminDashboard = () => {
 
   /* ─── Actions ─── */
   const handlePublish = async (id) => {
-    try { await API.put(`/events/${id}/status`, { status: 'published' }); toast.success('Event published!'); fetchData(); }
+    try { await API.put(`/events/${id}/publish`); toast.success('Event published!'); fetchData(); }
     catch { toast.error('Failed to publish'); }
   };
   const handleDeleteEvent = async (id) => {

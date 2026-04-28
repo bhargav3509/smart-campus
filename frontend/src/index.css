@@ -39,6 +39,10 @@
     @apply antialiased text-gray-900;
     font-family: 'Inter', sans-serif;
     background-color: #f8f9fc;
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.07) 1px, transparent 1px);
+    background-size: 60px 60px;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -113,7 +117,13 @@
 
 /* Main backgrounds */
 .dark body,
-.dark .bg-\[\#f8f9fc\] { background-color: #0f0f11 !important; }
+.dark .bg-\[\#f8f9fc\] {
+  background-color: #0f0f11 !important;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px) !important;
+  background-size: 60px 60px !important;
+}
 
 /* Surfaces */
 .dark .bg-white        { background-color: #1a1a1f !important; }
