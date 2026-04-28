@@ -40,12 +40,15 @@ const FacultyDashboard = () => {
       const [ev, vn, bk] = await Promise.all([
         API.get('/events/my'),
         API.get('/venues'),
-        API.get('/bookings/my'),
+        API.get('/bookings'),
       ]);
       setEvents(ev.data);
       setVenues(vn.data);
       setMyBookings(bk.data);
-    } catch { toast.error('Sync failed'); }
+    } catch (err) {
+      console.error('FacultyDashboard sync error:', err.response?.data || err.message);
+      toast.error(err.response?.data?.message || 'Failed to load dashboard data');
+    }
     finally { setLoading(false); }
   }, []);
 
@@ -66,8 +69,11 @@ const FacultyDashboard = () => {
   };
   const handleCancelBooking = async (id) => {
     if (!window.confirm('Cancel this booking request?')) return;
-    try { await API.delete(`/bookings/${id}`); toast.success('Booking cancelled'); fetchData(); }
-    catch { toast.error('Cancellation failed'); }
+    try {
+      await API.put(`/bookings/${id}/cancel`);
+      toast.success('Booking cancelled');
+      fetchData();
+    } catch (err) { toast.error(err.response?.data?.message || 'Cancellation failed'); }
   };
 
   if (loading) return <FullPageSpinner />;

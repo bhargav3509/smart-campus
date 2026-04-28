@@ -14,6 +14,24 @@ const {
 } = require('../controllers/eventController');
 
 router.get('/', auth, getEvents);
+
+// Faculty: get my own events (all statuses)
+router.get('/my', auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT e.*, v.name as venue_name
+       FROM events e
+       LEFT JOIN venues v ON e.venue_id = v.id
+       WHERE e.organizer_id = $1
+       ORDER BY e.created_at DESC`,
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.get('/:id', auth, getEvent);
 router.get('/:id/qr', auth, getEventQR);
 router.post('/', auth, upload.single('poster'), createEvent);
