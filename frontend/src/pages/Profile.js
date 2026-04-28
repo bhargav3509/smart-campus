@@ -20,7 +20,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('profile'); // profile | security
   const [editMode, setEditMode] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', department: '' });
+  const [editForm, setEditForm] = useState({ name: '', department: '', phone: '', branch: '', section: '', uid: '', bio: '' });
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -30,7 +30,15 @@ const Profile = () => {
     try {
       const res = await API.get('/profile/me');
       setProfile(res.data);
-      setEditForm({ name: res.data.name || '', department: res.data.department || '' });
+      setEditForm({
+        name:       res.data.name       || '',
+        department: res.data.department || '',
+        phone:      res.data.phone      || '',
+        branch:     res.data.branch     || '',
+        section:    res.data.section    || '',
+        uid:        res.data.uid        || '',
+        bio:        res.data.bio        || '',
+      });
     } catch { toast.error('Failed to load profile'); }
     finally { setLoading(false); }
   };
@@ -156,30 +164,67 @@ const Profile = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {[
-                    { label: 'Email Address',   value: profile?.email },
-                    { label: 'Account Status',  value: 'Verified', green: true },
-                    { label: 'Member Since',    value: new Date(profile?.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) },
-                    { label: 'Department',      value: profile?.department || 'Not set' },
+                    { label: 'Email Address', value: profile?.email },
+                    { label: 'Account',       value: 'Active ✓', green: true },
+                    { label: 'Member Since',  value: new Date(profile?.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) },
+                    { label: 'Department',    value: profile?.department || '—' },
+                    { label: 'Phone',         value: profile?.phone      || '—' },
+                    { label: 'Branch',        value: profile?.branch     || '—' },
+                    { label: 'Section',       value: profile?.section    || '—' },
+                    { label: 'UID / Roll No', value: profile?.uid        || '—' },
                   ].map(({ label, value, green }) => (
                     <div key={label}>
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
                       <p className={`text-sm font-bold ${green ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
                     </div>
                   ))}
+                  {profile?.bio && (
+                    <div className="col-span-2">
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Bio</p>
+                      <p className="text-sm font-medium text-gray-600 leading-relaxed">{profile.bio}</p>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <h3 className="text-xl font-black font-display mb-4">Edit Profile</h3>
-                <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Full Name *</p>
-                  <input type="text" className={IC} value={editForm.name}
-                    onChange={e => setEditForm(f => ({...f, name: e.target.value}))} required />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Department</p>
-                  <input type="text" className={IC} value={editForm.department} placeholder="e.g. Computer Science"
-                    onChange={e => setEditForm(f => ({...f, department: e.target.value}))} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Full Name *</p>
+                    <input type="text" className={IC} value={editForm.name}
+                      onChange={e => setEditForm(f => ({...f, name: e.target.value}))} required />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Department</p>
+                    <input type="text" className={IC} value={editForm.department} placeholder="e.g. Computer Science"
+                      onChange={e => setEditForm(f => ({...f, department: e.target.value}))} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Phone</p>
+                    <input type="tel" className={IC} value={editForm.phone} placeholder="+91 98765 43210"
+                      onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Branch</p>
+                    <input type="text" className={IC} value={editForm.branch} placeholder="e.g. CSE, ECE, ME"
+                      onChange={e => setEditForm(f => ({...f, branch: e.target.value}))} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Section</p>
+                    <input type="text" className={IC} value={editForm.section} placeholder="e.g. A, B, C"
+                      onChange={e => setEditForm(f => ({...f, section: e.target.value}))} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">UID / Roll Number</p>
+                    <input type="text" className={IC} value={editForm.uid} placeholder="e.g. 22CS001"
+                      onChange={e => setEditForm(f => ({...f, uid: e.target.value}))} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Bio</p>
+                    <textarea rows={3} className={`${IC} resize-none`} value={editForm.bio} placeholder="Tell us a little about yourself…"
+                      onChange={e => setEditForm(f => ({...f, bio: e.target.value}))} />
+                  </div>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving}

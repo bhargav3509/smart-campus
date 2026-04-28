@@ -66,7 +66,10 @@ const AnalyticsDashboard = () => {
     { icon: IconAdmin, label: 'Admin', onClick: () => navigate('/admin') },
   ];
 
-  const total = (stats?.bookings_approved || 0) + (stats?.bookings_rejected || 0) + (stats?.bookings_pending || 0);
+  const bTotal     = Number(stats?.bookings?.total    || 0);
+  const bApproved  = Number(stats?.bookings?.approved || 0);
+  const bPending   = Number(stats?.bookings?.pending  || 0);
+  const bRejected  = bTotal - bApproved - bPending;
 
   return (
     <DashboardLayout
@@ -84,17 +87,17 @@ const AnalyticsDashboard = () => {
 
         {/* ── KPI cards ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Total Events" value={stats?.total_events} delay="0ms" color={BLUE}
+          <StatCard label="Total Events" value={stats?.events?.total} delay="0ms" color={BLUE}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
           />
-          <StatCard label="Registrations" value={stats?.total_registrations} delay="60ms" color={GREEN}
+          <StatCard label="Registrations" value={stats?.registrations?.total} delay="60ms" color={GREEN}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
           />
-          <StatCard label="Published Events" value={stats?.published_events} delay="120ms" color={YELLOW}
+          <StatCard label="Published" value={stats?.events?.published} delay="120ms" color={YELLOW}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
           />
-          <StatCard label="Avg Attendees" value={stats?.avg_registrations_per_event ? Math.round(stats.avg_registrations_per_event) : 0} delay="180ms" color={RED}
-            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}
+          <StatCard label="Total Venues" value={stats?.venues?.total} delay="180ms" color={RED}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>}
           />
         </div>
 
@@ -102,20 +105,20 @@ const AnalyticsDashboard = () => {
           {/* ── Booking pipeline ── */}
           <div className="bg-white rounded-[28px] p-8 border border-gray-100 shadow-soft animate-slide-up delay-200">
             <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">Venue Booking Pipeline</h3>
-            {total === 0 ? (
+            {bTotal === 0 ? (
               <p className="text-sm text-gray-400 font-medium">No booking data yet.</p>
             ) : (
               <>
-                <PipelineBar label="Approved Bookings" value={stats?.bookings_approved || 0} max={total} color={GREEN} />
-                <PipelineBar label="Pending Review"    value={stats?.bookings_pending || 0}  max={total} color={YELLOW} />
-                <PipelineBar label="Rejected"          value={stats?.bookings_rejected || 0} max={total} color={RED} />
+                <PipelineBar label="Approved" value={bApproved} max={bTotal} color={GREEN} />
+                <PipelineBar label="Pending"  value={bPending}  max={bTotal} color={YELLOW} />
+                <PipelineBar label="Rejected" value={bRejected} max={bTotal} color={RED} />
               </>
             )}
             <div className="mt-6 pt-6 border-t border-gray-50 grid grid-cols-3 gap-4 text-center">
               {[
-                { label: 'Approved', value: stats?.bookings_approved || 0, color: GREEN },
-                { label: 'Pending',  value: stats?.bookings_pending  || 0, color: YELLOW },
-                { label: 'Rejected', value: stats?.bookings_rejected || 0, color: RED },
+                { label: 'Approved', value: bApproved, color: GREEN  },
+                { label: 'Pending',  value: bPending,  color: YELLOW },
+                { label: 'Rejected', value: bRejected, color: RED    },
               ].map(({ label, value, color }) => (
                 <div key={label}>
                   <p className="text-2xl font-black font-display" style={{ color }}>{value}</p>
@@ -130,11 +133,11 @@ const AnalyticsDashboard = () => {
             <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">System Metrics</h3>
             <div className="space-y-4">
               {[
-                { label: 'Total Users',           value: stats?.total_users           || 0 },
-                { label: 'Students',              value: stats?.total_students        || 0 },
-                { label: 'Faculty Members',       value: stats?.total_faculty         || 0 },
-                { label: 'Total Venues',          value: stats?.total_venues          || 0 },
-                { label: 'Total Bookings',        value: total },
+                { label: 'Total Users',    value: Number(stats?.users?.total    || 0) },
+                { label: 'Students',       value: Number(stats?.users?.students || 0) },
+                { label: 'Faculty',        value: Number(stats?.users?.faculty  || 0) },
+                { label: 'Total Venues',   value: Number(stats?.venues?.total   || 0) },
+                { label: 'Total Bookings', value: bTotal },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                   <p className="text-sm font-semibold text-gray-600">{label}</p>
@@ -146,7 +149,7 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* ── Top events table ── */}
-        {stats?.top_events && stats.top_events.length > 0 && (
+        {stats?.topEvents && stats.topEvents.length > 0 && (
           <div className="bg-white rounded-[28px] p-8 border border-gray-100 shadow-soft animate-slide-up delay-400">
             <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">Top Events by Registrations</h3>
             <div className="overflow-x-auto">
@@ -159,7 +162,7 @@ const AnalyticsDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.top_events.map((ev, i) => (
+                  {stats.topEvents.map((ev, i) => (
                     <tr key={ev.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                       <td className="py-3.5 px-4 text-sm font-bold text-gray-900">{ev.title}</td>
                       <td className="py-3.5 px-4 text-xs font-medium text-gray-500">{ev.category || '—'}</td>

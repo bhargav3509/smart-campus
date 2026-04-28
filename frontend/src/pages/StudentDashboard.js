@@ -179,10 +179,10 @@ const StudentDashboard = () => {
   const handleCancelRegistration = async (eventId) => {
     if (!window.confirm('Cancel your registration for this event?')) return;
     try {
-      await API.delete(`/registrations/event/${eventId}`);
+      await API.delete(`/registrations/${eventId}`);
       toast.success('Registration cancelled');
       fetchData();
-    } catch { toast.error('Cancellation failed'); }
+    } catch (err) { toast.error(err.response?.data?.message || 'Cancellation failed'); }
   };
 
   const isRegistered = (id) => myRegistrations.some(r => r.event_id === id);
@@ -191,8 +191,14 @@ const StudentDashboard = () => {
 
   const sortedEvents = [...events].sort((a, b) => {
     if (sortOption === 'newest')    return new Date(b.created_at) - new Date(a.created_at);
-    if (sortOption === 'ended_last') return new Date(b.end_time) - new Date(a.end_time);
-    return new Date(a.start_time) - new Date(b.start_time);
+    if (sortOption === 'ended_last') {
+      const aPast = new Date() > new Date(a.end_time);
+      const bPast = new Date() > new Date(b.end_time);
+      if (aPast && !bPast) return 1;   // a is past → push to end
+      if (!aPast && bPast) return -1;  // b is past → push to end
+      return new Date(a.start_time) - new Date(b.start_time); // both same → sort by start
+    }
+    return new Date(a.start_time) - new Date(b.start_time); // upcoming
   });
 
   if (loading) return <FullPageSpinner />;
