@@ -1,205 +1,184 @@
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import toast from 'react-hot-toast';
-import NotificationBell from '../components/NotificationBell';
-import gsap from 'gsap';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { FullPageSpinner } from '../components/ui/Spinner';
 
-const BLUE = '#1a73e8';
-const GREEN = '#34a853';
-const RED = '#ea4335';
+const BLUE   = '#1a73e8';
+const GREEN  = '#34a853';
 const YELLOW = '#fbbc05';
-const PURPLE = '#7c4dff';
+const RED    = '#ea4335';
 
-const IconDashboard = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-  </svg>
-);
+const IconStats  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
+const IconAdmin  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 
-const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
-  <div onClick={onClick} className={`flex flex-col items-center gap-1.5 py-4 cursor-pointer transition-all ${active ? 'text-blue-600 bg-blue-50/50' : 'text-gray-400 hover:text-gray-600'}`}>
-    <Icon />
-    <span className="text-[10px] font-black uppercase tracking-wider">{label}</span>
-  </div>
-);
-
-const StatCard = ({ label, value, sub, colorClass }) => (
-  <div className="bg-white rounded-[32px] p-8 shadow-soft border border-gray-100/50 stat-card">
-    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{label}</p>
-    <div className="flex items-baseline gap-2">
-      <p className="text-5xl font-black text-gray-900" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{value ?? '—'}</p>
+/* ─── Stat card ─── */
+const StatCard = ({ label, value, icon, color, delay }) => (
+  <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-soft animate-slide-up" style={{ animationDelay: delay }}>
+    <div className="flex items-center justify-between mb-4">
+      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: color + '15', color }}>
+        {icon}
+      </div>
     </div>
-    {sub && <p className="text-xs font-bold text-gray-400 mt-2 lowercase">{sub}</p>}
-    <div className={`mt-4 h-1 w-12 rounded-full ${colorClass}`}></div>
+    <p className="text-4xl font-black font-display" style={{ color }}>{value ?? '—'}</p>
   </div>
 );
+
+/* ─── Bar ─── */
+const PipelineBar = ({ label, value, max, color }) => {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return (
+    <div className="mb-5">
+      <div className="flex justify-between items-center mb-1.5">
+        <p className="text-xs font-semibold text-gray-600">{label}</p>
+        <span className="text-[10px] font-black text-gray-400">{value} ({pct}%)</span>
+      </div>
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+    </div>
+  );
+};
 
 const AnalyticsDashboard = () => {
-  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const container = useRef(null);
 
-  useEffect(() => { fetchStats(); }, []);
-
-  const fetchStats = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await API.get('/analytics/stats');
       setStats(res.data);
     } catch { toast.error('Failed to load analytics'); }
     finally { setLoading(false); }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (!loading && stats) {
-      const ctx = gsap.context(() => {
-        gsap.from('.sidebar', { x: -80, opacity: 0, duration: 0.6, ease: 'power3.out' });
-        gsap.from('.top-nav', { y: -60, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.1 });
-        gsap.delayedCall(0.3, () => {
-          gsap.from('.stat-card', { scale: 0.9, opacity: 0, duration: 0.5, stagger: 0.05, ease: 'power2.out' });
-          gsap.from('.table-section', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.5 });
-        });
-      }, container);
-      return () => ctx.revert();
-    }
-  }, [loading, stats]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${BLUE} transparent transparent transparent` }} />
-    </div>
-  );
+  if (loading) return <FullPageSpinner />;
+
+  const sidebarTop = [
+    { icon: IconStats, label: 'Analytics', active: true, onClick: () => {} },
+  ];
+  const sidebarBottom = [
+    { icon: IconAdmin, label: 'Admin', onClick: () => navigate('/admin') },
+  ];
+
+  const total = (stats?.bookings_approved || 0) + (stats?.bookings_rejected || 0) + (stats?.bookings_pending || 0);
 
   return (
-    <div ref={container} className="min-h-screen bg-[#f8f9fc] flex font-sans antialiased text-gray-900">
-      
-      {/* Sidebar */}
-      <aside className="sidebar w-20 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col items-center py-8 z-50 sticky top-0 h-screen">
-        <div className="mb-12">
-          <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
+    <DashboardLayout
+      title="Analytics"
+      subtitle="Platform Health"
+      sidebarTop={sidebarTop}
+      sidebarBottom={sidebarBottom}
+      accentColor="#0f0f11"
+    >
+      <div className="px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-5xl font-black text-gray-900 leading-none mb-1 font-display">Platform Health</h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Real-time campus engagement metrics</p>
         </div>
-        <SidebarItem icon={IconDashboard} label="Home" active onClick={() => window.history.back()} />
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="top-nav h-20 bg-white/70 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-40">
-          <div className="flex items-center gap-8">
-            <h1 className="text-3xl font-black tracking-tight" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Data Engine</h1>
-            <div className="bg-gray-100 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-400">System Analytics</div>
-          </div>
-          <div className="flex items-center gap-6">
-            <NotificationBell />
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => logout()}>
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold border-2 border-white shadow-sm">
-                {user?.name?.charAt(0)}
-              </div>
+        {/* ── KPI cards ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatCard label="Total Events" value={stats?.total_events} delay="0ms" color={BLUE}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+          />
+          <StatCard label="Registrations" value={stats?.total_registrations} delay="60ms" color={GREEN}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
+          />
+          <StatCard label="Published Events" value={stats?.published_events} delay="120ms" color={YELLOW}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
+          />
+          <StatCard label="Avg Attendees" value={stats?.avg_registrations_per_event ? Math.round(stats.avg_registrations_per_event) : 0} delay="180ms" color={RED}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* ── Booking pipeline ── */}
+          <div className="bg-white rounded-[28px] p-8 border border-gray-100 shadow-soft animate-slide-up delay-200">
+            <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">Venue Booking Pipeline</h3>
+            {total === 0 ? (
+              <p className="text-sm text-gray-400 font-medium">No booking data yet.</p>
+            ) : (
+              <>
+                <PipelineBar label="Approved Bookings" value={stats?.bookings_approved || 0} max={total} color={GREEN} />
+                <PipelineBar label="Pending Review"    value={stats?.bookings_pending || 0}  max={total} color={YELLOW} />
+                <PipelineBar label="Rejected"          value={stats?.bookings_rejected || 0} max={total} color={RED} />
+              </>
+            )}
+            <div className="mt-6 pt-6 border-t border-gray-50 grid grid-cols-3 gap-4 text-center">
+              {[
+                { label: 'Approved', value: stats?.bookings_approved || 0, color: GREEN },
+                { label: 'Pending',  value: stats?.bookings_pending  || 0, color: YELLOW },
+                { label: 'Rejected', value: stats?.bookings_rejected || 0, color: RED },
+              ].map(({ label, value, color }) => (
+                <div key={label}>
+                  <p className="text-2xl font-black font-display" style={{ color }}>{value}</p>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </header>
 
-        <div className="flex-1 overflow-y-auto px-10 py-10">
-          <div className="mb-10">
-            <h2 className="text-6xl font-black text-gray-900 leading-none mb-2" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Platform Health</h2>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Real-time engagement metrics</p>
+          {/* ── Platform health ── */}
+          <div className="bg-white rounded-[28px] p-8 border border-gray-100 shadow-soft animate-slide-up delay-300">
+            <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">System Metrics</h3>
+            <div className="space-y-4">
+              {[
+                { label: 'Total Users',           value: stats?.total_users           || 0 },
+                { label: 'Students',              value: stats?.total_students        || 0 },
+                { label: 'Faculty Members',       value: stats?.total_faculty         || 0 },
+                { label: 'Total Venues',          value: stats?.total_venues          || 0 },
+                { label: 'Total Bookings',        value: total },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                  <p className="text-sm font-semibold text-gray-600">{label}</p>
+                  <p className="text-lg font-black font-display text-gray-900">{value}</p>
+                </div>
+              ))}
+            </div>
           </div>
-
-          {stats && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-                <StatCard label="Total Users" value={stats.users.total} sub={`${stats.users.students} students / ${stats.users.faculty} faculty`} colorClass="bg-blue-600" />
-                <StatCard label="Live Events" value={stats.events.total} sub={`${stats.events.published} published / ${stats.events.draft} drafts`} colorClass="bg-green-500" />
-                <StatCard label="Infrastructure" value={stats.venues.total} sub="Active campus venues" colorClass="bg-purple-500" />
-                <StatCard label="Engagement" value={stats.registrations.total} sub="Total seat reservations" colorClass="bg-yellow-500" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                <div className="bg-white rounded-[40px] p-10 shadow-soft border border-gray-100/50">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Queue Status</p>
-                      <h4 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Booking Pipeline</h4>
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Pending Requests</span>
-                      <span className="text-3xl font-black text-orange-500" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{stats.bookings.pending}</span>
-                    </div>
-                    <div className="w-full bg-gray-50 h-2 rounded-full overflow-hidden">
-                      <div className="bg-orange-400 h-full transition-all duration-1000" style={{ width: `${(stats.bookings.pending / (stats.bookings.total || 1)) * 100}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-[40px] p-10 shadow-soft border border-gray-100/50">
-                   <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Success Metrics</p>
-                      <h4 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Approved Slots</h4>
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Confirmed Bookings</span>
-                      <span className="text-3xl font-black text-teal-500" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{stats.bookings.approved}</span>
-                    </div>
-                    <div className="w-full bg-gray-50 h-2 rounded-full overflow-hidden">
-                      <div className="bg-teal-500 h-full transition-all duration-1000" style={{ width: `${(stats.bookings.approved / (stats.bookings.total || 1)) * 100}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="table-section bg-white rounded-[40px] p-10 shadow-soft border border-gray-100/50 overflow-hidden">
-                <h3 className="text-3xl font-black text-gray-900 mb-8" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>High Occupancy Events</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="text-left border-b border-gray-50">
-                        <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Event Identity</th>
-                        <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Venue</th>
-                        <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Registrations</th>
-                        <th className="pb-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Saturation</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {stats.topEvents.map((event, i) => {
-                        const fill = event.max_attendees ? Math.round((event.registration_count / event.max_attendees) * 100) : 0;
-                        return (
-                          <tr key={i} className="group hover:bg-gray-50/50 transition-colors">
-                            <td className="py-6 pr-4">
-                              <p className="text-sm font-black text-gray-900 uppercase tracking-tight">{event.title}</p>
-                            </td>
-                            <td className="py-6 pr-4">
-                              <p className="text-xs font-bold text-gray-500">{event.venue_name || 'TBA'}</p>
-                            </td>
-                            <td className="py-6 pr-4">
-                              <p className="text-xs font-black text-gray-900">{event.registration_count} / {event.max_attendees}</p>
-                            </td>
-                            <td className="py-6">
-                              <div className="flex items-center gap-3">
-                                <div className="flex-1 max-w-[120px] bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                                  <div className={`h-full transition-all duration-1000 ${fill > 80 ? 'bg-red-500' : fill > 50 ? 'bg-yellow-400' : 'bg-green-500'}`} style={{ width: `${Math.min(fill, 100)}%` }}></div>
-                                </div>
-                                <span className="text-[10px] font-black text-gray-400">{fill}%</span>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
         </div>
-      </main>
-    </div>
+
+        {/* ── Top events table ── */}
+        {stats?.top_events && stats.top_events.length > 0 && (
+          <div className="bg-white rounded-[28px] p-8 border border-gray-100 shadow-soft animate-slide-up delay-400">
+            <h3 className="text-2xl font-black text-gray-900 mb-6 font-display">Top Events by Registrations</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['Event', 'Category', 'Venue', 'Registrations', 'Status'].map(h => (
+                      <th key={h} className="text-left py-3 px-4 text-[9px] font-black uppercase tracking-widest text-gray-400">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.top_events.map((ev, i) => (
+                    <tr key={ev.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-3.5 px-4 text-sm font-bold text-gray-900">{ev.title}</td>
+                      <td className="py-3.5 px-4 text-xs font-medium text-gray-500">{ev.category || '—'}</td>
+                      <td className="py-3.5 px-4 text-xs font-medium text-gray-500">{ev.venue_name || 'TBA'}</td>
+                      <td className="py-3.5 px-4">
+                        <span className="text-sm font-black text-blue-600">{ev.registration_count}</span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${ev.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{ev.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 
