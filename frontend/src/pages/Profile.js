@@ -13,6 +13,68 @@ const IconHome    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="
 
 const IC = 'w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all';
 
+/* ── Role badge colours ── */
+const ROLE_COLOR = {
+  student: { bg: 'bg-blue-50',   text: 'text-blue-600',   border: 'border-blue-100'   },
+  faculty: { bg: 'bg-green-50',  text: 'text-green-600',  border: 'border-green-100'  },
+  admin:   { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' },
+};
+
+/* ── View fields per role ── */
+const VIEW_FIELDS = {
+  student: (p) => [
+    { label: 'Email',         value: p?.email },
+    { label: 'Account',       value: 'Active ✓', green: true },
+    { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
+    { label: 'Department',    value: p?.department  || '—' },
+    { label: 'Phone',         value: p?.phone       || '—' },
+    { label: 'Branch',        value: p?.branch      || '—' },
+    { label: 'Section',       value: p?.section     || '—' },
+    { label: 'Roll / UID',    value: p?.uid         || '—' },
+  ],
+  faculty: (p) => [
+    { label: 'Email',         value: p?.email },
+    { label: 'Account',       value: 'Active ✓', green: true },
+    { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
+    { label: 'Department',    value: p?.department  || '—' },
+    { label: 'Phone',         value: p?.phone       || '—' },
+    { label: 'Employee ID',   value: p?.uid         || '—' },
+  ],
+  admin: (p) => [
+    { label: 'Email',         value: p?.email },
+    { label: 'Account',       value: 'Active ✓', green: true },
+    { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
+    { label: 'Department',    value: p?.department  || '—' },
+    { label: 'Phone',         value: p?.phone       || '—' },
+  ],
+};
+
+/* ── Edit fields per role ── */
+const EDIT_FIELDS = {
+  student: [
+    { key: 'name',       label: 'Full Name',         type: 'text', placeholder: 'Your full name',      required: true,  span: 2 },
+    { key: 'department', label: 'Department',         type: 'text', placeholder: 'e.g. Engineering' },
+    { key: 'phone',      label: 'Phone',              type: 'tel',  placeholder: '+91 98765 43210' },
+    { key: 'branch',     label: 'Branch',             type: 'text', placeholder: 'e.g. CSE, ECE, ME' },
+    { key: 'section',    label: 'Section',            type: 'text', placeholder: 'e.g. A, B, C' },
+    { key: 'uid',        label: 'Roll / UID',         type: 'text', placeholder: 'e.g. 22CS001',        span: 2 },
+    { key: 'bio',        label: 'Bio',                type: 'textarea', placeholder: 'Tell us a bit about yourself…', span: 2 },
+  ],
+  faculty: [
+    { key: 'name',       label: 'Full Name',         type: 'text', placeholder: 'Your full name',      required: true,  span: 2 },
+    { key: 'department', label: 'Department',         type: 'text', placeholder: 'e.g. Computer Science' },
+    { key: 'phone',      label: 'Phone',              type: 'tel',  placeholder: '+91 98765 43210' },
+    { key: 'uid',        label: 'Employee ID',        type: 'text', placeholder: 'e.g. FAC-2024-001',   span: 2 },
+    { key: 'bio',        label: 'Research / Bio',     type: 'textarea', placeholder: 'Areas of research, interests…', span: 2 },
+  ],
+  admin: [
+    { key: 'name',       label: 'Full Name',         type: 'text', placeholder: 'Your full name',      required: true,  span: 2 },
+    { key: 'department', label: 'Department',         type: 'text', placeholder: 'e.g. Administration' },
+    { key: 'phone',      label: 'Phone',              type: 'tel',  placeholder: '+91 98765 43210' },
+    { key: 'bio',        label: 'Notes',              type: 'textarea', placeholder: 'Any admin notes…',              span: 2 },
+  ],
+};
+
 const Profile = () => {
   const { user, login, token } = useAuth();
   const navigate = useNavigate();
@@ -153,34 +215,39 @@ const Profile = () => {
                   <div>
                     <h3 className="text-4xl font-black text-gray-900 leading-none mb-2 font-display">{profile?.name}</h3>
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-[9px] font-black px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100 uppercase tracking-widest">{profile?.role}</span>
-                      <span className="text-[9px] font-black px-3 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-widest">{profile?.department || 'No Department'}</span>
-                    </div>
+                    <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${(ROLE_COLOR[user?.role] || ROLE_COLOR.admin).bg} ${(ROLE_COLOR[user?.role] || ROLE_COLOR.admin).text} ${(ROLE_COLOR[user?.role] || ROLE_COLOR.admin).border}`}>
+                      {profile?.role}
+                    </span>
+                    {profile?.department && (
+                      <span className="text-[9px] font-black px-3 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-widest">
+                        {profile.department}
+                      </span>
+                    )}
+                    {user?.role === 'student' && profile?.branch && (
+                      <span className="text-[9px] font-black px-3 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-widest">
+                        {profile.branch}{profile.section ? ` · ${profile.section}` : ''}
+                      </span>
+                    )}
+                  </div>
                   </div>
                   <button onClick={() => setEditMode(true)}
                     className="px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors flex-shrink-0">
                     Edit Profile
                   </button>
                 </div>
+                {/* ── Role-aware info grid ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {[
-                    { label: 'Email Address', value: profile?.email },
-                    { label: 'Account',       value: 'Active ✓', green: true },
-                    { label: 'Member Since',  value: new Date(profile?.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) },
-                    { label: 'Department',    value: profile?.department || '—' },
-                    { label: 'Phone',         value: profile?.phone      || '—' },
-                    { label: 'Branch',        value: profile?.branch     || '—' },
-                    { label: 'Section',       value: profile?.section    || '—' },
-                    { label: 'UID / Roll No', value: profile?.uid        || '—' },
-                  ].map(({ label, value, green }) => (
+                  {(VIEW_FIELDS[user?.role] || VIEW_FIELDS.admin)(profile).map(({ label, value, green }) => (
                     <div key={label}>
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{label}</p>
                       <p className={`text-sm font-bold ${green ? 'text-green-500' : 'text-gray-800'}`}>{value}</p>
                     </div>
                   ))}
                   {profile?.bio && (
-                    <div className="col-span-2">
-                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Bio</p>
+                    <div className="sm:col-span-2">
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                        {user?.role === 'faculty' ? 'Research / Bio' : 'Bio'}
+                      </p>
                       <p className="text-sm font-medium text-gray-600 leading-relaxed">{profile.bio}</p>
                     </div>
                   )}
@@ -188,43 +255,35 @@ const Profile = () => {
               </>
             ) : (
               <form onSubmit={handleSaveProfile} className="space-y-4">
-                <h3 className="text-xl font-black font-display mb-4">Edit Profile</h3>
+                <h3 className="text-xl font-black font-display mb-4">
+                  Edit {user?.role === 'student' ? 'Student' : user?.role === 'faculty' ? 'Faculty' : 'Admin'} Profile
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Full Name *</p>
-                    <input type="text" className={IC} value={editForm.name}
-                      onChange={e => setEditForm(f => ({...f, name: e.target.value}))} required />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Department</p>
-                    <input type="text" className={IC} value={editForm.department} placeholder="e.g. Computer Science"
-                      onChange={e => setEditForm(f => ({...f, department: e.target.value}))} />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Phone</p>
-                    <input type="tel" className={IC} value={editForm.phone} placeholder="+91 98765 43210"
-                      onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Branch</p>
-                    <input type="text" className={IC} value={editForm.branch} placeholder="e.g. CSE, ECE, ME"
-                      onChange={e => setEditForm(f => ({...f, branch: e.target.value}))} />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Section</p>
-                    <input type="text" className={IC} value={editForm.section} placeholder="e.g. A, B, C"
-                      onChange={e => setEditForm(f => ({...f, section: e.target.value}))} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">UID / Roll Number</p>
-                    <input type="text" className={IC} value={editForm.uid} placeholder="e.g. 22CS001"
-                      onChange={e => setEditForm(f => ({...f, uid: e.target.value}))} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Bio</p>
-                    <textarea rows={3} className={`${IC} resize-none`} value={editForm.bio} placeholder="Tell us a little about yourself…"
-                      onChange={e => setEditForm(f => ({...f, bio: e.target.value}))} />
-                  </div>
+                  {(EDIT_FIELDS[user?.role] || EDIT_FIELDS.admin).map(({ key, label, type, placeholder, required, span }) => (
+                    <div key={key} className={span === 2 ? 'sm:col-span-2' : ''}>
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
+                        {label}{required ? ' *' : ''}
+                      </p>
+                      {type === 'textarea' ? (
+                        <textarea
+                          rows={3}
+                          className={`${IC} resize-none`}
+                          value={editForm[key] || ''}
+                          placeholder={placeholder}
+                          onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                        />
+                      ) : (
+                        <input
+                          type={type}
+                          className={IC}
+                          value={editForm[key] || ''}
+                          placeholder={placeholder}
+                          required={!!required}
+                          onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving}
