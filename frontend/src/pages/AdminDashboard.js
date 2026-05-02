@@ -74,7 +74,7 @@ const AdminDashboard = () => {
       setEvents(ev.data);
       setVenues(vn.data);
       setBookings(bk.data);
-    } catch { toast.error('Failed to sync data'); }
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed to sync data'); }
     finally { setLoading(false); }
   }, []);
 
@@ -121,7 +121,8 @@ const AdminDashboard = () => {
       else fd.append(k, v);
     });
     try { await API.post('/events', fd); toast.success('Event created!'); setShowEventForm(false); fetchData(); }
-    catch { toast.error('Failed to create event'); }
+    catch (err) { toast.error(err.response?.data?.message || err.message || 'Failed to create event'); }
+
   };
 
   if (loading) return <FullPageSpinner />;
