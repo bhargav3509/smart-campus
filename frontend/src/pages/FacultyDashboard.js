@@ -217,7 +217,8 @@ const FacultyDashboard = () => {
                     style={{ animationDelay: `${Math.min(idx * 50, 300)}ms` }}>
                     <div className="h-36 relative bg-gray-50 overflow-hidden flex-shrink-0">
                       {event.poster_url && (
-                        <img src={event.poster_url.startsWith('http') ? event.poster_url : `http://localhost:5000/${event.poster_url.replace(/^\//, '')}`}
+                        <img src={event.poster_url.startsWith('http') ? event.poster_url : `${(process.env.REACT_APP_API_URL || `${window.location.protocol}//${window.location.hostname}:5000/api`).replace(/\/api$/, '')}/${event.poster_url.replace(/^\//, '')}`}
+
                           alt="" className="w-full h-full object-cover" onError={e => e.target.style.display='none'} />
                       )}
                       <div className="absolute top-3 left-3 z-10"><StatusBadge status={event.status} /></div>

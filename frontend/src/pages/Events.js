@@ -99,8 +99,10 @@ const Events = () => {
               const accent = ACCENTS[idx % ACCENTS.length];
               const registered = registeredIds.includes(event.id);
               const past = new Date() > new Date(event.end_time);
+              const apiBase = (process.env.REACT_APP_API_URL || `${window.location.protocol}//${window.location.hostname}:5000/api`).replace(/\/api$/, '');
               const posterSrc = event.poster_url
-                ? (event.poster_url.startsWith('http') ? event.poster_url : `http://localhost:5000/${event.poster_url.replace(/^\//, '')}`)
+                ? (event.poster_url.startsWith('http') ? event.poster_url : `${apiBase}/${event.poster_url.replace(/^\//, '')}`)
+
                 : null;
 
               return (

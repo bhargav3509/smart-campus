@@ -33,8 +33,10 @@ const EventCard = ({ event, idx, registered, past, onRegister, onCancel, onViewT
   const accent = ACCENTS[idx % ACCENTS.length];
   const delayMs = Math.min(idx * 50, 300);
 
+  const apiBase = (process.env.REACT_APP_API_URL || `${window.location.protocol}//${window.location.hostname}:5000/api`).replace(/\/api$/, '');
   const posterSrc = event.poster_url
-    ? (event.poster_url.startsWith('http') ? event.poster_url : `http://localhost:5000/${event.poster_url.replace(/^\//, '')}`)
+    ? (event.poster_url.startsWith('http') ? event.poster_url : `${apiBase}/${event.poster_url.replace(/^\//, '')}`)
+
     : null;
 
   return (
