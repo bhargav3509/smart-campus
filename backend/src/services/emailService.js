@@ -2,17 +2,17 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false, // STARTTLS on port 587
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: 465,        // Port 465 (implicit TLS) — Render free tier blocks 587 (STARTTLS)
+  secure: true,     // true = implicit TLS on 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   // Force IPv4 — Render free tier has no IPv6 outbound routing
   family: 4,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
 });
 
 // Verify connection
