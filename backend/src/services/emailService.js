@@ -3,12 +3,16 @@ require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: false, // STARTTLS on port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  // Force IPv4 — Render free tier has no IPv6 outbound routing
+  family: 4,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
 });
 
 // Verify connection

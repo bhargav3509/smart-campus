@@ -37,12 +37,10 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - REDIS_HOST=redis
-      - DB_HOST=postgres
-      - DATABASE_URL=
+      # DATABASE_URL from .env (Supabase) takes precedence — do NOT override here
     depends_on:
-      - postgres
       - redis
     networks:
       - smart-campus_default

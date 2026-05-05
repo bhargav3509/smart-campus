@@ -1,3 +1,6 @@
+// Force IPv4 DNS resolution — Render free tier doesn't support IPv6 outbound (smtp.gmail.com fails with ENETUNREACH on IPv6)
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
