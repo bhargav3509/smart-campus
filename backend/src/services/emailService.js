@@ -1,39 +1,33 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 require('dotenv').config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: 465,        // Port 465 (implicit TLS) — Render free tier blocks 587 (STARTTLS)
-  secure: true,     // true = implicit TLS on 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Force IPv4 — Render free tier has no IPv6 outbound routing
-  family: 4,
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify connection
-transporter.verify((error) => {
-  if (error) {
-    console.error('Email service error:', error.message);
-  } else {
-    console.log('Email service ready!');
-  }
-});
+// From address — use onboarding@resend.dev (Resend's shared domain) unless a custom domain is verified in Resend dashboard
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'Eve-Sphere <onboarding@resend.dev>';
+
+// Startup check
+if (!process.env.RESEND_API_KEY) {
+  console.warn('⚠️  RESEND_API_KEY not set — emails will be skipped');
+} else {
+  console.log('Email service ready! (Resend via HTTPS)');
+}
 
 // ── Helper to send any email ──
 const sendEmail = async ({ to, subject, html }) => {
+  if (!process.env.RESEND_API_KEY) return;
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+    const { data, error } = await resend.emails.send({
+      from: FROM_ADDRESS,
       to,
       subject,
       html,
     });
-    console.log(`Email sent to ${to}`);
+    if (error) {
+      console.error('Failed to send email:', error.message);
+    } else {
+      console.log(`Email sent to ${to} (id: ${data?.id})`);
+    }
   } catch (err) {
     console.error('Failed to send email:', err.message);
   }
