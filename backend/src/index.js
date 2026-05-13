@@ -41,6 +41,31 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({ message: 'EveSphere API is running!' });
 });
+
+// Health check — keeps Supabase active (prevents free-tier pause) and Render warm
+app.get('/health', async (req, res) => {
+  const status = { status: 'ok', db: 'unknown', redis: 'unknown', timestamp: new Date().toISOString() };
+  try {
+    await pool.query('SELECT 1');
+    status.db = 'connected';
+  } catch (err) {
+    status.db = 'error';
+    status.status = 'degraded';
+  }
+  try {
+    const redisClient = redis.getClient ? redis.getClient() : redis;
+    if (redisClient && redisClient.ping) {
+      await redisClient.ping();
+      status.redis = 'connected';
+    } else {
+      status.redis = 'unavailable';
+    }
+  } catch {
+    status.redis = 'unavailable';
+  }
+  const httpStatus = status.status === 'ok' ? 200 : 207;
+  res.status(httpStatus).json(status);
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/venues', venueRoutes);
 app.use('/api/events', eventRoutes);
