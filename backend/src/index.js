@@ -1,3 +1,6 @@
+// Force IPv4 DNS resolution — Render free tier doesn't support IPv6 outbound (smtp.gmail.com fails with ENETUNREACH on IPv6)
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -13,6 +16,10 @@ const notificationRoutes = require('./routes/notifications');
 const registrationRoutes = require('./routes/registrations');
 const analyticsRoutes = require('./routes/analytics');
 const profileRoutes = require('./routes/profile');
+const resourceRoutes = require('./routes/resources');
+const departmentRoutes = require('./routes/departments');
+const subjectRoutes = require('./routes/subjects');
+const resourceCategoryRoutes = require('./routes/resourceCategories');
 
 dotenv.config();
 const app = express();
@@ -27,21 +34,41 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+  origin: function(origin, callback) {
+    callback(null, true);
   },
   credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Smart Campus API is running!' });
+  res.json({ message: 'EveSphere API is running!' });
+});
+
+// Health check — keeps Supabase active (prevents free-tier pause) and Render warm
+app.get('/health', async (req, res) => {
+  const status = { status: 'ok', db: 'unknown', redis: 'unknown', timestamp: new Date().toISOString() };
+  try {
+    await pool.query('SELECT 1');
+    status.db = 'connected';
+  } catch (err) {
+    status.db = 'error';
+    status.status = 'degraded';
+  }
+  try {
+    const redisClient = redis.getClient ? redis.getClient() : redis;
+    if (redisClient && redisClient.ping) {
+      await redisClient.ping();
+      status.redis = 'connected';
+    } else {
+      status.redis = 'unavailable';
+    }
+  } catch {
+    status.redis = 'unavailable';
+  }
+  const httpStatus = status.status === 'ok' ? 200 : 207;
+  res.status(httpStatus).json(status);
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/venues', venueRoutes);
@@ -51,8 +78,12 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/subjects', subjectRoutes);
+app.use('/api/resource-categories', resourceCategoryRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
