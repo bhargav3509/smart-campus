@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus Platform - In-Depth Viva Voce Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            margin-top: 30px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .question {
+            font-weight: bold;
+            color: #2980b9;
+            margin-top: 20px;
+        }
+        .answer {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2980b9;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        code {
+            background-color: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Smart Campus Platform - In-Depth Viva Voce Guide</h1>
+    <p>This is an advanced, in-depth guide detailing the internal workings of the Smart Campus (EveSphere) platform. It covers database schemas, specific code flows, and advanced technical questions.</p>
+
+    <h2>1. Complete Architecture & Tech Stack</h2>
+
+    <h3>Frontend (Client-Side)</h3>
+    <ul>
+        <li><strong>Core Framework:</strong> React.js (v19)</li>
+        <li><strong>Routing:</strong> React Router v7. <code>&lt;PrivateRoute&gt;</code> component handles role-based rendering.</li>
+        <li><strong>Styling:</strong> Tailwind CSS + PostCSS. Tailwind's utility-first approach allows for zero external CSS file dependencies.</li>
+        <li><strong>State Management & Data Fetching:</strong>
+            <ul>
+                <li><code>AuthContext</code>: A React Context provider that globally stores the user's role and token.</li>
+                <li><code>@tanstack/react-query</code>: Used for caching API requests on the client side, preventing redundant network calls.</li>
+                <li><code>axios</code>: Pre-configured via <code>src/services/api.js</code> to automatically attach the JWT token (stored in localStorage) to the Authorization header using an interceptor.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Backend (Server-Side)</h3>
+    <ul>
+        <li><strong>Core Framework:</strong> Node.js + Express.js (v5)</li>
+        <li><strong>Database Connection:</strong> Uses the <code>pg</code> library (Pool) to connect to PostgreSQL. Raw SQL queries are used instead of an ORM (like Prisma or Sequelize) to ensure maximum performance and control over complex joins.</li>
+        <li><strong>Authentication:</strong> <code>jsonwebtoken</code> (JWT) for stateless sessions and <code>bcryptjs</code> for hashing user passwords before they enter the database.</li>
+        <li><strong>External Integrations:</strong>
+            <ul>
+                <li><strong>AWS S3 (<code>@aws-sdk/client-s3</code>):</strong> Images uploaded via multer are streamed directly to S3. The Postgres database only stores the S3 URL (e.g., poster_url).</li>
+                <li><strong>Nodemailer:</strong> Used in <code>emailService.js</code> to send real-time emails for event registrations, cancellations, and password resets.</li>
+                <li><strong>QRCode (<code>qrcode</code>):</strong> The backend generates Base64 QR codes containing event registration URLs.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Infrastructure (DevOps)</h3>
+    <ul>
+        <li><strong>Docker Compose:</strong> Orchestrates 4 containers:
+            <ul>
+                <li><code>postgres</code> (PostgreSQL 17, with volume mounting postgres_data for persistence).</li>
+                <li><code>redis</code> (Redis Cache for fast data retrieval).</li>
+                <li><code>backend</code> (Node API running on port 5001).</li>
+                <li><code>frontend</code> (React app running on port 80).</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>2. Relational Database Schema (PostgreSQL)</h2>
+    <h3>Core Tables & Relationships</h3>
+    
+    <h4><code>users</code> Table</h4>
+    <ul>
+        <li>id (Primary Key)</li>
+        <li>name, email (Unique)</li>
+        <li>password (Hashed via bcrypt)</li>
+        <li>role (Enum: student, faculty, admin)</li>
+    </ul>
+
+    <h4><code>venues</code> Table</h4>
+    <ul>
+        <li>id (Primary Key)</li>
+        <li>name</li>
+    </ul>
+
+    <h4><code>events</code> Table</h4>
+    <ul>
+        <li>id (Primary Key)</li>
+        <li>title, description</li>
+        <li>start_time, end_time</li>
+        <li>max_attendees</li>
+        <li>poster_url (Stored as AWS S3 link)</li>
+        <li>status (e.g., pending, published)</li>
+        <li>organizer_id (Foreign Key referencing users.id)</li>
+        <li>venue_id (Foreign Key referencing venues.id)</li>
+    </ul>
+
+    <h4><code>registrations</code> Table (Many-to-Many Bridge)</h4>
+    <ul>
+        <li>event_id (Foreign Key referencing events.id)</li>
+        <li>user_id (Foreign Key referencing users.id)</li>
+        <li><em>Composite Primary Key (event_id, user_id) to prevent duplicate registrations.</em></li>
+    </ul>
+
+    <h2>3. Deep Dive: Code Flow of "Registering for an Event"</h2>
+    <p>If the examiner asks: <em>"Walk me through exactly what happens in the code when a student registers for an event."</em></p>
+    <ol>
+        <li><strong>Frontend Trigger:</strong> Student clicks "Register" on the React frontend. An Axios POST request is made to <code>/api/events/:id/register</code>. The Axios interceptor automatically attaches the student's JWT token.</li>
+        <li><strong>Backend Authentication (Middleware):</strong> The request hits the Express route. An authentication middleware runs, verifies the JWT using a secret key, and attaches the decoded user data (<code>req.user = { id, role }</code>) to the request.</li>
+        <li><strong>Controller Validation (eventController.js):</strong>
+            <ul>
+                <li>The backend runs a <code>SELECT</code> query to ensure the event exists.</li>
+                <li>It runs another <code>SELECT</code> query on the registrations table to check if the user is already registered. If yes, it returns a 400 Error.</li>
+            </ul>
+        </li>
+        <li><strong>Database Insert:</strong> The backend executes <code>INSERT INTO registrations (event_id, user_id) VALUES ($1, $2)</code>.</li>
+        <li><strong>Email Notification:</strong> The backend calls <code>sendRegistrationConfirmation()</code> (from emailService.js), which connects to an SMTP server via Nodemailer to email the student their ticket.</li>
+        <li><strong>Frontend Update:</strong> The frontend receives a 201 Created status, shows a success Toast notification, and React Query automatically refetches the student's dashboard data to show the newly registered event.</li>
+    </ol>
+
+    <h2>4. Advanced Viva Questions & Answers</h2>
+
+    <div class="question">Q1: Why did you choose raw SQL (pg Pool) over an ORM like Prisma or Sequelize?</div>
+    <div class="answer">Answer: While ORMs speed up development, we chose raw SQL via the pg library because it gives us absolute control over query optimization. In endpoints like getEvents, we use dynamic LEFT JOINs (joining events with users and venues) and dynamic WHERE clauses depending on the user's role and search parameters. Raw SQL ensures we don't suffer from the "N+1 query problem" common in ORMs.</div>
+
+    <div class="question">Q2: How do you handle file uploads, and why didn't you save images directly to the PostgreSQL database or local disk?</div>
+    <div class="answer">Answer: Saving images as BLOBs in a relational database bloats the database and ruins performance. Saving them to the local disk is a bad practice in modern cloud deployments (like Docker or Render) because containers are ephemeral—if the container restarts, the images are lost. Instead, we use multer to intercept the file, stream it directly to an AWS S3 bucket, and only save the S3 public URL string in the Postgres database.</div>
+
+    <div class="question">Q3: Can you explain how the Axios Interceptor works in your project?</div>
+    <div class="answer">Answer: In src/services/api.js, we configure an Axios interceptor on the request object. Before any HTTP request leaves the React app, the interceptor checks localStorage for a JWT. If it finds one, it mutates the request config to include headers.Authorization = 'Bearer &lt;token&gt;'. This centralizes our authentication logic so we don't have to manually attach tokens in every single component.</div>
+
+    <div class="question">Q4: How does the QR code generation work?</div>
+    <div class="answer">Answer: When an admin generates a QR code for an event, the backend uses the qrcode library to generate a Base64 image string. The QR data encodes a specific URL (e.g., http://frontend/register-event/123). The React frontend receives this Base64 string and renders it in an &lt;img&gt; tag. When a user scans it, their phone directs them to that specific React route to complete the registration.</div>
+
+    <div class="question">Q5: How does your Docker network allow the backend to talk to PostgreSQL?</div>
+    <div class="answer">Answer: In our docker-compose.yml, we define a custom bridge network called smart-campus_default. Containers on the same network can communicate using their service names as hostnames. So, in the backend's .env file, the DB_HOST is simply set to postgres (the name of the DB service), and Docker's internal DNS automatically resolves that to the correct container IP.</div>
+
+    <div class="question">Q6: What is a Many-to-Many relationship, and how is it implemented in your database?</div>
+    <div class="answer">Answer: A many-to-many relationship occurs when multiple records in one table relate to multiple records in another. For example, a User can attend many Events, and an Event has many Users attending. We resolve this by creating a "bridge" or "junction" table called registrations. It holds the user_id and event_id as foreign keys, linking the two entities together.</div>
+
+</body>
+</html>

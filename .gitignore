@@ -1,20 +1,2 @@
-# Dependencies
-node_modules
-**/node_modules
-
-# Build
-frontend/build
-
-# Environment
-.env
-**/.env
-
-# Logs
-*.log
-
-# Uploads
-backend/uploads
-
-# OS
-.DS_Store
-Thumbs.db
+.vercel
+.env*

@@ -7,3 +7,32 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Supabase Transaction Mode Pooler — project tkgrhbmvmzdhuueymblj (Mumbai)
+      # postgresql://postgres.tkgrhbmvmzdhuueymblj:[password]@aws-1-ap-south-1.pooler.supabase.com:6543/postgres
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: ap-south-1
+      - key: AWS_S3_BUCKET
+        value: evesphere-uploads
+

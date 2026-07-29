@@ -5,14 +5,21 @@ const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || '
 
 const clientConfig = {
   url: redisUrl,
+  socket: {
+    // Stop retrying after 3 attempts — Redis is optional for core functionality
+    reconnectStrategy: (retries) => {
+      if (retries >= 3) {
+        console.warn('Redis unavailable — running without cache/realtime features.');
+        return false; // stop retrying
+      }
+      return Math.min(retries * 500, 3000);
+    },
+  },
 };
 
-// Railway Redis requires TLS (rediss:// protocol)
+// Railway/Supabase Redis requires TLS (rediss:// protocol)
 if (redisUrl.startsWith('rediss://')) {
-  clientConfig.socket = {
-    tls: true,
-    rejectUnauthorized: false,
-  };
+  clientConfig.socket = { ...clientConfig.socket, tls: true, rejectUnauthorized: false };
 }
 
 const client = redis.createClient(clientConfig);
@@ -22,11 +29,15 @@ client.on('connect', () => {
 });
 
 client.on('error', (err) => {
-  console.error('Redis connection error:', err.message);
+  // Only log first error — reconnectStrategy handles the rest
+  if (!client._warnedRedis) {
+    console.warn('Redis connection issue:', err.message);
+    client._warnedRedis = true;
+  }
 });
 
-client.connect().catch(err => {
-  console.error('Redis failed to connect:', err.message);
+client.connect().catch(() => {
+  // Silently ignore — reconnectStrategy already logs the warning
 });
 
-module.exports = client;
+module.exports = client;

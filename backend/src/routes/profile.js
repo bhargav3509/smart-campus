@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const pool = require('../config/db');
 const upload = require('../utils/upload');
+const { uploadToS3 } = require('../utils/s3');
 
 // Get my profile
 router.get('/me', auth, async (req, res) => {
@@ -53,13 +54,31 @@ router.put('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const avatar_url = `/uploads/${req.file.filename}`;
+    const avatar_url = await uploadToS3(req.file, 'avatars');
     const result = await pool.query(
       `UPDATE users SET avatar_url = $1 WHERE id = $2
        RETURNING id, name, email, role, department, phone, branch, section, uid, bio, avatar_url`,
       [avatar_url, req.user.id]
     );
     res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Change password
+const bcrypt = require('bcryptjs');
+router.post('/change-password', auth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const user = userRes.rows[0];
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) return res.status(401).json({ message: 'Current password is incorrect' });
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashed, req.user.id]);
+    res.json({ message: 'Password changed successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
