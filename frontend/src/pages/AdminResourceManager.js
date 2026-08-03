@@ -163,17 +163,11 @@ const AdminResourceManager = () => {
   const headerActions = (
     <div className="flex items-center gap-3">
       {activeTab === 'resources' && (
-        <>
-          <div className="relative hidden md:block">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-              className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-44 text-gray-900 dark:text-gray-100" />
-          </div>
-          <button onClick={() => navigate('/resources')}
-            className="px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white shadow-md active:scale-95 transition-all" style={{ backgroundColor: '#1a73e8' }}>
-            + Upload / Browse
-          </button>
-        </>
+        <div className="relative hidden md:block">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+            className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-44 text-gray-900 dark:text-gray-100" />
+        </div>
       )}
       {activeTab === 'departments' && (
         <button onClick={() => setShowDeptForm(v => !v)}
