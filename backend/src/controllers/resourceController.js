@@ -265,8 +265,8 @@ exports.getResource = async (req, res) => {
 // POST /resources — upload new resource (faculty/admin)
 exports.createResource = async (req, res) => {
   try {
-    if (req.user.role === 'student') {
-      return res.status(403).json({ message: 'Faculty or Admin only' });
+    if (req.user.role !== 'faculty') {
+      return res.status(403).json({ message: 'Faculty only' });
     }
 
     const { title, description, external_url, department_id, semester, subject_id, category_id, tags, resource_type } = req.body;

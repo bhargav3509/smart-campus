@@ -168,6 +168,58 @@ const ResourceCard = ({ resource, idx, onBookmark, onDownload, onClick, isBookma
   );
 };
 
+/* ═══ Resource form (shared between upload and edit) ═══ */
+const ResourceForm = ({ form, setForm, onSubmit, submitLabel, onCancel, isEdit = false, categories, departments, subjects, uploading }) => (
+  <div className={`mb-8 bg-white dark:bg-[#1a1a1f] rounded-[32px] p-8 border ${isEdit ? 'border-green-100/50 dark:border-green-500/20' : 'border-blue-100/50 dark:border-blue-500/20'} shadow-soft animate-slide-up`}>
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="text-2xl font-black font-display text-gray-900 dark:text-white">{isEdit ? 'Edit Resource' : 'Upload New Resource'}</h3>
+      <button onClick={onCancel} type="button" className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.05] flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <input type="text" placeholder="Resource Title *" className={IC} required value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} />
+      <select className={IC} value={form.category_id} onChange={e => setForm(f => ({...f, category_id: e.target.value}))}>
+        <option value="">Select Category</option>
+        {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+      </select>
+      <textarea placeholder="Description" rows={3} className={`${IC} md:col-span-2 h-24 resize-none`} value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
+      <select className={IC} value={form.department_id} onChange={e => setForm(f => ({...f, department_id: e.target.value, subject_id: ''}))}>
+        <option value="">Select Department</option>
+        {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+      </select>
+      <select className={IC} value={form.semester} onChange={e => setForm(f => ({...f, semester: e.target.value, subject_id: ''}))}>
+        <option value="">Select Semester</option>
+        {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+      </select>
+      <select className={IC} value={form.subject_id} onChange={e => setForm(f => ({...f, subject_id: e.target.value}))}>
+        <option value="">Select Subject</option>
+        {subjects.map(s => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
+      </select>
+      <input type="text" placeholder="Resource Type (e.g. Notes, Lab Manual)" className={IC} value={form.resource_type} onChange={e => setForm(f => ({...f, resource_type: e.target.value}))} />
+      <input type="text" placeholder="Tags (comma separated)" className={`${IC} md:col-span-2`} value={form.tags} onChange={e => setForm(f => ({...f, tags: e.target.value}))} />
+      <input type="url" placeholder="External Link (YouTube, Google Drive, etc.)" className={`${IC} md:col-span-2`} value={form.external_url} onChange={e => setForm(f => ({...f, external_url: e.target.value}))} />
+      <div className="md:col-span-2 bg-gray-50 dark:bg-[#111114] border border-dashed border-gray-200 dark:border-white/[0.10] rounded-2xl p-5 text-center">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+          {isEdit ? 'Replace File (Optional)' : 'Upload File (PDF, DOC, PPT, ZIP, Image — max 50MB)'}
+        </p>
+        <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.jpg,.jpeg,.png,.gif,.webp" className="text-xs"
+          onChange={e => setForm(f => ({...f, file: e.target.files[0]}))} />
+      </div>
+      <div className="md:col-span-2 flex gap-3 pt-2">
+        <button type="submit" disabled={uploading}
+          className="flex-1 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-white shadow-lg disabled:opacity-50 active:scale-95 transition-all"
+          style={{ backgroundColor: isEdit ? GREEN : BLUE }}>
+          {uploading ? 'Uploading…' : submitLabel}
+        </button>
+        <button type="button" onClick={onCancel} className="px-8 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/[0.05] hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+);
+
 /* ═══════════════════════════════════════════════════════════
    MAIN PAGE
    ═══════════════════════════════════════════════════════════ */
@@ -407,7 +459,7 @@ const StudyResources = () => {
   const sidebarTop = [
     { icon: IconBrowse, label: 'Browse', active: activeTab === 'browse', onClick: () => setActiveTab('browse') },
   ];
-  if (isFaculty || isAdmin) {
+  if (isFaculty) {
     sidebarTop.push({ icon: IconMyUploads, label: 'My Uploads', active: activeTab === 'my-uploads', onClick: () => setActiveTab('my-uploads') });
   }
   if (isStudent) {
@@ -432,7 +484,7 @@ const StudyResources = () => {
             className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-52 text-gray-900 dark:text-gray-100" />
         </div>
       )}
-      {(isFaculty || isAdmin) && (
+      {isFaculty && (
         <button onClick={() => { setShowUploadForm(v => !v); }}
           className="px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white shadow-md active:scale-95 transition-all"
           style={{ backgroundColor: BLUE }}>
@@ -460,57 +512,7 @@ const StudyResources = () => {
     'history': 'Your recently downloaded resources',
   };
 
-  /* ═══ Resource form (shared between upload and edit) ═══ */
-  const ResourceForm = ({ form, setForm, onSubmit, submitLabel, onCancel, isEdit = false }) => (
-    <div className={`mb-8 bg-white dark:bg-[#1a1a1f] rounded-[32px] p-8 border ${isEdit ? 'border-green-100/50 dark:border-green-500/20' : 'border-blue-100/50 dark:border-blue-500/20'} shadow-soft animate-slide-up`}>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-black font-display text-gray-900 dark:text-white">{isEdit ? 'Edit Resource' : 'Upload New Resource'}</h3>
-        <button onClick={onCancel} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.05] flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <input type="text" placeholder="Resource Title *" className={IC} required value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} />
-        <select className={IC} value={form.category_id} onChange={e => setForm(f => ({...f, category_id: e.target.value}))}>
-          <option value="">Select Category</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-        </select>
-        <textarea placeholder="Description" rows={3} className={`${IC} md:col-span-2 h-24 resize-none`} value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
-        <select className={IC} value={form.department_id} onChange={e => setForm(f => ({...f, department_id: e.target.value, subject_id: ''}))}>
-          <option value="">Select Department</option>
-          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-        </select>
-        <select className={IC} value={form.semester} onChange={e => setForm(f => ({...f, semester: e.target.value, subject_id: ''}))}>
-          <option value="">Select Semester</option>
-          {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
-        </select>
-        <select className={IC} value={form.subject_id} onChange={e => setForm(f => ({...f, subject_id: e.target.value}))}>
-          <option value="">Select Subject</option>
-          {uploadSubjects.map(s => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
-        </select>
-        <input type="text" placeholder="Resource Type (e.g. Notes, Lab Manual)" className={IC} value={form.resource_type} onChange={e => setForm(f => ({...f, resource_type: e.target.value}))} />
-        <input type="text" placeholder="Tags (comma separated)" className={`${IC} md:col-span-2`} value={form.tags} onChange={e => setForm(f => ({...f, tags: e.target.value}))} />
-        <input type="url" placeholder="External Link (YouTube, Google Drive, etc.)" className={`${IC} md:col-span-2`} value={form.external_url} onChange={e => setForm(f => ({...f, external_url: e.target.value}))} />
-        <div className="md:col-span-2 bg-gray-50 dark:bg-[#111114] border border-dashed border-gray-200 dark:border-white/[0.10] rounded-2xl p-5 text-center">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
-            {isEdit ? 'Replace File (Optional)' : 'Upload File (PDF, DOC, PPT, ZIP, Image — max 50MB)'}
-          </p>
-          <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.jpg,.jpeg,.png,.gif,.webp" className="text-xs"
-            onChange={e => setForm(f => ({...f, file: e.target.files[0]}))} />
-        </div>
-        <div className="md:col-span-2 flex gap-3 pt-2">
-          <button type="submit" disabled={uploading}
-            className="flex-1 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-white shadow-lg disabled:opacity-50 active:scale-95 transition-all"
-            style={{ backgroundColor: isEdit ? GREEN : BLUE }}>
-            {uploading ? 'Uploading…' : submitLabel}
-          </button>
-          <button type="button" onClick={onCancel} className="px-8 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/[0.05] hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+
 
   return (
     <DashboardLayout
@@ -540,6 +542,10 @@ const StudyResources = () => {
             onSubmit={handleUpload}
             submitLabel="Upload Resource"
             onCancel={() => setShowUploadForm(false)}
+            categories={categories}
+            departments={departments}
+            subjects={uploadSubjects}
+            uploading={uploading}
           />
         )}
 
@@ -636,7 +642,9 @@ const StudyResources = () => {
                   editingResource === r.id ? (
                     <ResourceForm key={r.id} form={editForm} setForm={setEditForm}
                       onSubmit={handleEditResource} submitLabel="Save Changes"
-                      onCancel={() => setEditingResource(null)} isEdit />
+                      onCancel={() => setEditingResource(null)} isEdit
+                      categories={categories} departments={departments} subjects={subjects} uploading={uploading}
+                    />
                   ) : (
                     <div key={r.id} className="bg-white dark:bg-[#1a1a1f] rounded-[24px] p-6 border border-gray-100 dark:border-white/[0.06] shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-5 animate-slide-up"
                       style={{ animationDelay: `${idx * 50}ms` }}>
