@@ -14,6 +14,9 @@ import Events           from './pages/Events';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import Profile          from './pages/Profile';
 import QRRegister       from './pages/QRRegister';
+import StudyResources   from './pages/StudyResources';
+import ResourceDetail   from './pages/ResourceDetail';
+import AdminResourceManager from './pages/AdminResourceManager';
 
 /* Route guard — requires auth; optional role check */
 const PrivateRoute = ({ children, roles }) => {
@@ -87,6 +90,23 @@ function App() {
           <Route path="/analytics" element={
             <PrivateRoute roles={['admin']}>
               <AnalyticsDashboard />
+            </PrivateRoute>
+          } />
+
+          {/* ── Study Resources ── */}
+          <Route path="/resources" element={
+            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+              <StudyResources />
+            </PrivateRoute>
+          } />
+          <Route path="/resources/:id" element={
+            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+              <ResourceDetail />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/resources" element={
+            <PrivateRoute roles={['admin']}>
+              <AdminResourceManager />
             </PrivateRoute>
           } />
 
