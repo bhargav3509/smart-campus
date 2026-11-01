@@ -17,7 +17,8 @@ const IC = 'w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 text-
 const ROLE_COLOR = {
   student: { bg: 'bg-blue-50',   text: 'text-blue-600',   border: 'border-blue-100'   },
   faculty: { bg: 'bg-green-50',  text: 'text-green-600',  border: 'border-green-100'  },
-  admin:   { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' },
+  admin:       { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' },
+  super_admin: { bg: 'bg-red-50',    text: 'text-red-600',    border: 'border-red-100'    },
 };
 
 /* ── View fields per role ── */
@@ -159,7 +160,7 @@ const Profile = () => {
 
   if (loading) return <FullPageSpinner />;
 
-  const homeRoute = user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
+  const homeRoute = ['admin', 'super_admin'].includes(user?.role) ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
 
   const sidebarTop = [
     { icon: IconHome, label: 'Back',    onClick: () => navigate(homeRoute) },
@@ -256,7 +257,7 @@ const Profile = () => {
             ) : (
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <h3 className="text-xl font-black font-display mb-4">
-                  Edit {user?.role === 'student' ? 'Student' : user?.role === 'faculty' ? 'Faculty' : 'Admin'} Profile
+                  Edit {user?.role === 'student' ? 'Student' : user?.role === 'faculty' ? 'Faculty' : user?.role === 'super_admin' ? 'Super Admin' : 'Admin'} Profile
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(EDIT_FIELDS[user?.role] || EDIT_FIELDS.admin).map(({ key, label, type, placeholder, required, span }) => (

@@ -55,7 +55,7 @@ const AppNavbar = ({ role = '' }) => {
           <h1
             className="text-2xl font-black tracking-tight cursor-pointer select-none"
             style={{ fontFamily: '"Big Shoulders Display", sans-serif', color: BLUE }}
-            onClick={() => navigate(role === 'admin' ? '/admin' : role === 'faculty' ? '/faculty' : '/student')}
+            onClick={() => navigate(['admin', 'super_admin'].includes(role) ? '/admin' : role === 'faculty' ? '/faculty' : '/student')}
           >
             EveSphere
           </h1>
@@ -69,7 +69,7 @@ const AppNavbar = ({ role = '' }) => {
 
         {/* Desktop nav */}
         <div className="hidden sm:flex items-center gap-1">
-          {role === 'admin' && (
+          {['admin', 'super_admin'].includes(role) && (
             <button onClick={() => navigate('/analytics')}
               className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
               <IconBarChart /> Analytics
@@ -99,7 +99,7 @@ const AppNavbar = ({ role = '' }) => {
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
         <div className="sm:hidden mt-3 flex flex-col gap-0.5 pb-2 border-t border-gray-100 pt-3">
-          {role === 'admin' && (
+          {['admin', 'super_admin'].includes(role) && (
             <button onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition text-left">
               <IconBarChart /> Analytics

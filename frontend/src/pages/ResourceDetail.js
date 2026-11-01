@@ -59,7 +59,7 @@ const ResourceDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isStudent = user?.role === 'student';
-  const isAdmin   = user?.role === 'admin';
+  const isAdmin   = ['admin', 'super_admin'].includes(user?.role);
 
   const [resource, setResource] = useState(null);
   const [comments, setComments] = useState([]);

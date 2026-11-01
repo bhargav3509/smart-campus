@@ -47,7 +47,7 @@ const DashboardLayout = ({
   }, [menuOpen]);
 
   const homeRoute =
-    user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
+    ['admin', 'super_admin'].includes(user?.role) ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
 
   return (
     <div className="min-h-screen bg-transparent flex font-sans antialiased text-gray-900 dark:text-gray-100 transition-colors duration-300">

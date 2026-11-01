@@ -35,7 +35,7 @@ const LandingPage = () => {
   // If already logged in, redirect to dashboard
   useEffect(() => {
     if (user) {
-      const route = user.role === 'admin' ? '/admin' : user.role === 'faculty' ? '/faculty' : '/student';
+      const route = ['admin', 'super_admin'].includes(user.role) ? '/admin' : user.role === 'faculty' ? '/faculty' : '/student';
       navigate(route);
     }
   }, [user, navigate]);

@@ -471,7 +471,7 @@ const StudyResources = () => {
     { icon: IconProfile, label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
-  const homeRoute = user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
+  const homeRoute = ['admin', 'super_admin'].includes(user?.role) ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
 
   // ── Header actions ──
   const headerActions = (
