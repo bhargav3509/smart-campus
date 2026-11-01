@@ -9,24 +9,6 @@ const RED = '#ea4335';
 const GREEN = '#34a853';
 
 // SVG Icons
-const IconCheck = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
-
-const IconCircle = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-  </svg>
-);
-
-const IconArrowLeft = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-  </svg>
-);
-
 const getStrength = (password) => {
   let score = 0;
   if (password.length >= 8) score++;
@@ -124,7 +106,7 @@ const ResetPassword = () => {
                 ].map(({ key, label }) => (
                   <li key={key} className="text-[10px] flex items-center gap-2 font-black uppercase tracking-wider"
                     style={{ color: checks[key] ? GREEN : '#d1d5db' }}>
-                    {checks[key] ? <IconCheck /> : <IconCircle />} {label}
+                     {label}
                   </li>
                 ))}
               </ul>
@@ -141,7 +123,7 @@ const ResetPassword = () => {
               <p className="text-[10px] font-black uppercase tracking-wider mt-1.5" style={{ color: RED }}>Mismatch detected</p>
             )}
             {form.confirm && form.password === form.confirm && (
-              <p className="text-[10px] font-black uppercase tracking-wider mt-1.5 flex items-center gap-1" style={{ color: GREEN }}><IconCheck /> Passwords match</p>
+              <p className="text-[10px] font-black uppercase tracking-wider mt-1.5 flex items-center gap-1" style={{ color: GREEN }}>Passwords match</p>
             )}
           </div>
 
@@ -156,7 +138,7 @@ const ResetPassword = () => {
 
           <div className="anim-el mt-8 pt-6 border-t border-gray-50 text-center">
             <Link to="/login" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors">
-              <IconArrowLeft /> Return to Sign In
+               Return to Sign In
             </Link>
           </div>
         </form>

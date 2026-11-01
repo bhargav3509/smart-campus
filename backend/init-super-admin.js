@@ -35,7 +35,7 @@ async function initSuperAdmin() {
          VALUES ($1, $2, $3, 'super_admin', true, $4, 'Computer Science')`,
         ['Bhargav', bhargavEmail, bhargavPassword, '24BCS11028']
       );
-      console.log('✅ Super Admin created: Bhargav (24bcs11028@cuchd.in)');
+      console.log('[DONE] Super Admin created: Bhargav (24bcs11028@cuchd.in)');
     } else {
       await client.query(
         `UPDATE users SET
@@ -48,7 +48,7 @@ async function initSuperAdmin() {
          WHERE email = $4`,
         ['Bhargav', bhargavPassword, '24BCS11028', bhargavEmail]
       );
-      console.log('✅ Super Admin updated: Bhargav (24bcs11028@cuchd.in)');
+      console.log('[DONE] Super Admin updated: Bhargav (24bcs11028@cuchd.in)');
     }
 
     // Also sync to authorized_users if table exists
@@ -63,7 +63,7 @@ async function initSuperAdmin() {
            assigned_role = EXCLUDED.assigned_role,
            registration_status = EXCLUDED.registration_status`
       );
-      console.log('✅ Synced to authorized_users table');
+      console.log('[DONE] Synced to authorized_users table');
     } catch (e) {
       // ignore if authorized_users not migrated yet
     }
@@ -73,7 +73,7 @@ async function initSuperAdmin() {
     console.log('   Role:     super_admin');
     console.log('   UID:      24BCS11028');
   } catch (err) {
-    console.error('❌ Failed to create Super Admin:', err.message);
+    console.error('[ERROR] Failed to create Super Admin:', err.message);
     process.exitCode = 1;
   } finally {
     client.release();

@@ -4,17 +4,7 @@ import API from '../services/api';
 const BLUE = '#1a73e8';
 const RED = '#ea4335';
 
-const IconBell = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-  </svg>
-);
 
-const IconCheck = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -59,7 +49,7 @@ const NotificationBell = () => {
         className="relative p-2.5 rounded-full text-gray-600 hover:bg-gray-100 transition"
         aria-label="Notifications"
       >
-        <IconBell />
+        Notif
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold leading-none"
             style={{ backgroundColor: RED, fontSize: '10px' }}>
@@ -79,7 +69,7 @@ const NotificationBell = () => {
               <button onClick={handleMarkAllRead}
                 className="flex items-center gap-1.5 text-xs font-bold hover:underline transition"
                 style={{ color: BLUE }}>
-                <IconCheck /> Mark all read
+                Mark all read
               </button>
             )}
           </div>

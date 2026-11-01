@@ -7,9 +7,9 @@ async function migrate() {
       ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255),
       ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMPTZ;
     `);
-    console.log('✅ Migration successful: reset_token and reset_token_expiry columns added.');
+    console.log(' Migration successful: reset_token and reset_token_expiry columns added.');
   } catch (err) {
-    console.error('❌ Migration failed:', err.message);
+    console.error(' Migration failed:', err.message);
   } finally {
     await pool.end();
   }

@@ -15,8 +15,7 @@ const RED    = '#ea4335';
 const PURPLE = '#7c4dff';
 const ACCENTS = [BLUE, GREEN, YELLOW, RED, PURPLE];
 
-const IconHome    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-const IconProfile = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+
 
 const Events = () => {
   const { user } = useAuth();
@@ -54,15 +53,14 @@ const Events = () => {
   if (loading) return <FullPageSpinner />;
 
   const sidebarTop = [
-    { icon: IconHome, label: 'Home', onClick: () => navigate(-1) },
+    { label: 'Home', onClick: () => navigate(-1) },
   ];
   const sidebarBottom = [
-    { icon: IconProfile, label: 'Profile', onClick: () => navigate('/profile') },
+    { label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
   const headerActions = (
     <div className="relative">
-      <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input
         type="text" value={search} onChange={e => setSearch(e.target.value)}
         placeholder="Search events…"
@@ -90,7 +88,7 @@ const Events = () => {
           <EmptyState
             title={search ? 'No results found' : 'No Events Yet'}
             description={search ? `Nothing matches "${search}"` : 'Events will appear here once published'}
-            icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
+
             action={search ? <button onClick={() => setSearch('')} className="px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white" style={{ backgroundColor: BLUE }}>Clear Search</button> : null}
           />
         ) : (
@@ -113,7 +111,7 @@ const Events = () => {
                     {posterSrc
                       ? <img src={posterSrc} alt="" className="w-full h-full object-cover" onError={e => e.target.style.display='none'} />
                       : <div className="w-full h-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${accent}12, ${accent}05)` }}>
-                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="1.5" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
                         </div>
                     }
                     <div className="absolute top-3 left-3">
@@ -126,13 +124,9 @@ const Events = () => {
                     <h3 className="text-lg font-black text-gray-900 mb-1 leading-tight font-display line-clamp-2">{event.title}</h3>
                     <p className="text-xs text-gray-400 line-clamp-2 mb-4 font-medium">{event.description}</p>
                     <div className="space-y-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-5">
-                      <div className="flex items-center gap-1.5">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        {event.venue_name || 'TBA'}
+                      <div className="flex items-center gap-1.5">Venue: {event.venue_name || 'TBA'}
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        {fmtDate(event.start_time)}
+                      <div className="flex items-center gap-1.5">Date: {fmtDate(event.start_time)}
                       </div>
                     </div>
                     <div className="mt-auto">
@@ -140,7 +134,7 @@ const Events = () => {
                         <div className="w-full py-2.5 rounded-xl bg-gray-100 text-gray-400 text-center text-[9px] font-black uppercase tracking-widest border border-gray-200">Event Ended</div>
                       ) : user?.role === 'student' ? (
                         registered ? (
-                          <div className="w-full py-2.5 rounded-xl bg-green-50 text-green-600 text-center text-[9px] font-black uppercase tracking-widest border border-green-100">✓ Registered</div>
+                          <div className="w-full py-2.5 rounded-xl bg-green-50 text-green-600 text-center text-[9px] font-black uppercase tracking-widest border border-green-100">Registered</div>
                         ) : (
                           <button onClick={() => handleRegister(event.id)}
                             className="w-full py-2.5 rounded-xl text-white text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-md"

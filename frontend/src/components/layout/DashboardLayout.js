@@ -16,7 +16,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
     }`}
     style={{ outline: 'none' }}
   >
-    <Icon />
+    {Icon && <Icon />}
     <span className="text-[9px] font-black uppercase tracking-wider">{label}</span>
   </button>
 );

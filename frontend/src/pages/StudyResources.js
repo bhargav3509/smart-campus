@@ -17,28 +17,23 @@ const ACCENTS = [BLUE, GREEN, PURPLE, '#e040fb', '#00bcd4', RED, YELLOW];
 const IC = 'w-full bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 dark:text-gray-100';
 
 /* ─── Icons ─── */
-const IconBrowse    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 
-const IconBookmark  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
-const IconHistory   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-const IconMyUploads = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
-const IconProfile   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 
 /* ─── File type helpers ─── */
 const FILE_ICONS = {
-  pdf:  { icon: '📄', color: '#ea4335', label: 'PDF' },
-  doc:  { icon: '📝', color: '#1a73e8', label: 'DOC' },
-  docx: { icon: '📝', color: '#1a73e8', label: 'DOCX' },
-  ppt:  { icon: '📊', color: '#fbbc05', label: 'PPT' },
-  pptx: { icon: '📊', color: '#fbbc05', label: 'PPTX' },
-  zip:  { icon: '📦', color: '#7c4dff', label: 'ZIP' },
-  jpg:  { icon: '🖼️', color: '#34a853', label: 'Image' },
-  jpeg: { icon: '🖼️', color: '#34a853', label: 'Image' },
-  png:  { icon: '🖼️', color: '#34a853', label: 'Image' },
-  gif:  { icon: '🖼️', color: '#34a853', label: 'Image' },
-  webp: { icon: '🖼️', color: '#34a853', label: 'Image' },
+  pdf:  { icon: 'PDF', color: '#ea4335', label: 'PDF' },
+  doc:  { icon: 'DOC', color: '#1a73e8', label: 'DOC' },
+  docx: { icon: 'DOCX', color: '#1a73e8', label: 'DOCX' },
+  ppt:  { icon: 'PPT', color: '#fbbc05', label: 'PPT' },
+  pptx: { icon: 'PPTX', color: '#fbbc05', label: 'PPTX' },
+  zip:  { icon: 'ZIP', color: '#7c4dff', label: 'ZIP' },
+  jpg:  { icon: 'IMG', color: '#34a853', label: 'Image' },
+  jpeg: { icon: 'IMG', color: '#34a853', label: 'Image' },
+  png:  { icon: 'IMG', color: '#34a853', label: 'Image' },
+  gif:  { icon: 'IMG', color: '#34a853', label: 'Image' },
+  webp: { icon: 'IMG', color: '#34a853', label: 'Image' },
 };
-const getFileInfo = (type) => FILE_ICONS[type] || { icon: '📄', color: '#6b7280', label: type?.toUpperCase() || 'File' };
+const getFileInfo = (type) => FILE_ICONS[type] || { icon: type?.toUpperCase() || 'File', color: '#6b7280', label: type?.toUpperCase() || 'File' };
 
 const formatSize = (bytes) => {
   if (!bytes) return '';
@@ -87,7 +82,7 @@ const ResourceCard = ({ resource, idx, onBookmark, onDownload, onClick, isBookma
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {resource.category_name && (
             <span className="text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest bg-gray-50 dark:bg-white/[0.05] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-white/[0.06]">
-              {resource.category_icon} {resource.category_name}
+              {resource.category_name}
             </span>
           )}
           {resource.file_type && (
@@ -98,7 +93,7 @@ const ResourceCard = ({ resource, idx, onBookmark, onDownload, onClick, isBookma
           )}
           {resource.is_featured && (
             <span className="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
-              ⭐ Featured
+              Featured
             </span>
           )}
         </div>
@@ -174,14 +169,14 @@ const ResourceForm = ({ form, setForm, onSubmit, submitLabel, onCancel, isEdit =
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-2xl font-black font-display text-gray-900 dark:text-white">{isEdit ? 'Edit Resource' : 'Upload New Resource'}</h3>
       <button onClick={onCancel} type="button" className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.05] flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+x
       </button>
     </div>
     <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <input type="text" placeholder="Resource Title *" className={IC} required value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} />
       <select className={IC} value={form.category_id} onChange={e => setForm(f => ({...f, category_id: e.target.value}))}>
         <option value="">Select Category</option>
-        {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select>
       <textarea placeholder="Description" rows={3} className={`${IC} md:col-span-2 h-24 resize-none`} value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
       <select className={IC} value={form.department_id} onChange={e => setForm(f => ({...f, department_id: e.target.value, subject_id: ''}))}>
@@ -457,18 +452,18 @@ const StudyResources = () => {
 
   // ── Sidebar ──
   const sidebarTop = [
-    { icon: IconBrowse, label: 'Browse', active: activeTab === 'browse', onClick: () => setActiveTab('browse') },
+    { label: 'Browse', active: activeTab === 'browse', onClick: () => setActiveTab('browse') },
   ];
   if (isFaculty) {
-    sidebarTop.push({ icon: IconMyUploads, label: 'My Uploads', active: activeTab === 'my-uploads', onClick: () => setActiveTab('my-uploads') });
+    sidebarTop.push({ label: 'My Uploads', active: activeTab === 'my-uploads', onClick: () => setActiveTab('my-uploads') });
   }
   if (isStudent) {
-    sidebarTop.push({ icon: IconBookmark, label: 'Bookmarks', active: activeTab === 'bookmarks', onClick: () => setActiveTab('bookmarks') });
-    sidebarTop.push({ icon: IconHistory, label: 'History', active: activeTab === 'history', onClick: () => setActiveTab('history') });
+    sidebarTop.push({ label: 'Bookmarks', active: activeTab === 'bookmarks', onClick: () => setActiveTab('bookmarks') });
+    sidebarTop.push({ label: 'History', active: activeTab === 'history', onClick: () => setActiveTab('history') });
   }
 
   const sidebarBottom = [
-    { icon: IconProfile, label: 'Profile', onClick: () => navigate('/profile') },
+    { label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
   const homeRoute = user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
@@ -478,7 +473,6 @@ const StudyResources = () => {
     <div className="flex items-center gap-3">
       {activeTab === 'browse' && (
         <div className="relative hidden md:block">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" value={search} onChange={e => handleSearchChange(e.target.value)}
             placeholder="Search resources…"
             className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-52 text-gray-900 dark:text-gray-100" />
@@ -572,7 +566,7 @@ const StudyResources = () => {
             <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
               className="bg-white dark:bg-[#1a1a1f] border border-gray-100 dark:border-white/[0.06] px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 shadow-soft focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
               <option value="">All Categories</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select value={filterType} onChange={e => setFilterType(e.target.value)}
               className="bg-white dark:bg-[#1a1a1f] border border-gray-100 dark:border-white/[0.06] px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 shadow-soft focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
@@ -607,7 +601,7 @@ const StudyResources = () => {
             ? <EmptyState
                 title="No Resources Found"
                 description={search ? 'Try different search terms or clear filters' : 'Resources will appear here once uploaded'}
-                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>}
+
               />
             : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {resources.map((r, idx) => (
@@ -628,7 +622,7 @@ const StudyResources = () => {
             ? <EmptyState
                 title="No Uploads Yet"
                 description="Upload your first learning resource using the button above"
-                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>}
+
                 action={
                   <button onClick={() => setShowUploadForm(true)}
                     className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white"
@@ -656,12 +650,12 @@ const StudyResources = () => {
                           )}
                         </div>
                         <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          {r.category_name && <span>{r.category_icon} {r.category_name}</span>}
-                          {r.department_name && <span>🏛 {r.department_name}</span>}
-                          {r.semester && <span>📅 Sem {r.semester}</span>}
-                          <span>⬇ {r.download_count || 0} downloads</span>
-                          <span>⭐ {r.avg_rating > 0 ? parseFloat(r.avg_rating).toFixed(1) : '–'}</span>
-                          {r.file_size > 0 && <span>📎 {formatSize(r.file_size)}</span>}
+                          {r.category_name && <span>{r.category_name}</span>}
+                          {r.department_name && <span>{r.department_name}</span>}
+                          {r.semester && <span>Sem {r.semester}</span>}
+                          <span>{r.download_count || 0} downloads</span>
+                          <span>{r.avg_rating > 0 ? parseFloat(r.avg_rating).toFixed(1) : '–'}</span>
+                          {r.file_size > 0 && <span>{formatSize(r.file_size)}</span>}
                         </div>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
@@ -687,7 +681,7 @@ const StudyResources = () => {
             ? <EmptyState
                 title="No Bookmarks Yet"
                 description="Bookmark resources you want to access later"
-                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>}
+
                 action={
                   <button onClick={() => setActiveTab('browse')}
                     className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white"
@@ -715,7 +709,7 @@ const StudyResources = () => {
             ? <EmptyState
                 title="No Downloads Yet"
                 description="Resources you download will appear here"
-                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
+
                 action={
                   <button onClick={() => setActiveTab('browse')}
                     className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white"
@@ -733,9 +727,9 @@ const StudyResources = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="text-xl font-black text-gray-900 dark:text-white font-display truncate">{r.title}</h3>
                       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        {r.faculty_name && <span>👤 {r.faculty_name}</span>}
-                        {r.department_name && <span>🏛 {r.department_name}</span>}
-                        <span>📅 {new Date(r.downloaded_at).toLocaleDateString([], { dateStyle: 'medium' })}</span>
+                        {r.faculty_name && <span>By: {r.faculty_name}</span>}
+                        {r.department_name && <span>{r.department_name}</span>}
+                        <span>{new Date(r.downloaded_at).toLocaleDateString([], { dateStyle: 'medium' })}</span>
                       </div>
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); handleDownload(r); }}

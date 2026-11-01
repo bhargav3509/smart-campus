@@ -10,42 +10,6 @@ const GREEN = '#34a853';
 const RED = '#ea4335';
 
 // SVG Icons
-const IconLocation = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-  </svg>
-);
-
-const IconCalendar = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-);
-
-const IconUsers = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-);
-
-const IconUser = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-);
-
-const IconCheck = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
-
-const IconX = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-
 const QRRegister = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -119,7 +83,7 @@ const QRRegister = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="qr-card bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-sm text-center border border-gray-100">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${RED}15`, color: RED }}>
-            <IconX />
+            
           </div>
           <h2 className="text-2xl font-black mb-2" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Event Not Found</h2>
           <p className="text-gray-500 text-sm mb-6">The event you're looking for doesn't exist or has been removed.</p>
@@ -134,7 +98,7 @@ const QRRegister = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="qr-card bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-sm text-center border border-gray-100">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${GREEN}15`, color: GREEN }}>
-            <IconCheck />
+            
           </div>
           <h2 className="text-3xl font-black mb-1" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Already Registered!</h2>
           <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-4">Confirmed Seat</p>
@@ -142,9 +106,9 @@ const QRRegister = () => {
           <div className="bg-gray-50 rounded-3xl p-6 text-left space-y-3 mb-6 border border-gray-100">
             <h3 className="text-xl font-black text-blue-600 mb-2 truncate" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>{event.title}</h3>
             <div className="space-y-2 text-[13px] text-gray-500 font-medium">
-              <div className="flex items-center gap-2"><IconLocation /> {event.venue_name || 'TBA'}</div>
-              <div className="flex items-center gap-2"><IconCalendar /> {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
-              <div className="flex items-center gap-2"><IconUser /> {user?.name}</div>
+              <div className="flex items-center gap-2"> {event.venue_name || 'TBA'}</div>
+              <div className="flex items-center gap-2"> {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
+              <div className="flex items-center gap-2"> {user?.name}</div>
             </div>
           </div>
           
@@ -159,7 +123,7 @@ const QRRegister = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="qr-card bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-sm text-center border border-gray-100">
           <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: `${GREEN}15`, color: GREEN }}>
-            <IconCheck />
+            
           </div>
           <h2 className="text-3xl font-black mb-2 leading-tight" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>You're Registered!</h2>
           <p className="text-gray-500 mb-6">
@@ -180,10 +144,10 @@ const QRRegister = () => {
         
         <div className="bg-gray-50 rounded-3xl p-6 text-left space-y-3 mb-8 border border-gray-100">
           <div className="space-y-2 text-[13px] text-gray-500 font-medium">
-            <div className="flex items-center gap-2"><IconLocation /> {event.venue_name || 'TBA'}</div>
-            <div className="flex items-center gap-2"><IconCalendar /> {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
-            <div className="flex items-center gap-2"><IconUsers /> Max {event.max_attendees} spots</div>
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-200 mt-2"><IconUser /> <span className="font-bold text-gray-700 truncate">{user?.name}</span></div>
+            <div className="flex items-center gap-2"> {event.venue_name || 'TBA'}</div>
+            <div className="flex items-center gap-2"> {new Date(event.start_time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
+            <div className="flex items-center gap-2"> Max {event.max_attendees} spots</div>
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-200 mt-2"> <span className="font-bold text-gray-700 truncate">{user?.name}</span></div>
           </div>
         </div>
 
@@ -195,7 +159,7 @@ const QRRegister = () => {
         >
           {registering ? 'Registering...' : (
             <>
-              <IconCheck /> Confirm Registration
+               Confirm Registration
             </>
           )}
         </button>

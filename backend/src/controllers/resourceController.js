@@ -339,7 +339,7 @@ exports.createResource = async (req, res) => {
         }
 
         const students = await pool.query(studentQuery, studentParams);
-        const msg = `📚 New resource: "${title}" uploaded by ${facultyName}${semester ? ` (Sem ${semester})` : ''}`;
+        const msg = ` New resource: "${title}" uploaded by ${facultyName}${semester ? ` (Sem ${semester})` : ''}`;
         for (const student of students.rows) {
           createNotification(student.id, msg);
         }
@@ -509,7 +509,7 @@ exports.rateResource = async (req, res) => {
         const resource = await pool.query('SELECT title, uploaded_by FROM resources WHERE id = $1', [req.params.id]);
         if (resource.rows.length > 0) {
           const { title, uploaded_by } = resource.rows[0];
-          createNotification(uploaded_by, `⭐ Your resource "${title}" received a ${rating}★ rating!`);
+          createNotification(uploaded_by, `⭐ Your resource "${title}" received a ${rating} rating!`);
         }
       } catch { /* non-critical */ }
     }
@@ -564,7 +564,7 @@ exports.addComment = async (req, res) => {
         const commenterName = commenter.rows[0]?.name || 'Someone';
         createNotification(
           resource.rows[0].uploaded_by,
-          `💬 ${commenterName} commented on your resource "${resource.rows[0].title}"`
+          ` ${commenterName} commented on your resource "${resource.rows[0].title}"`
         );
       }
     } catch { /* non-critical */ }
@@ -637,7 +637,7 @@ exports.toggleFeatured = async (req, res) => {
     if (result.rows[0].is_featured) {
       createNotification(
         result.rows[0].uploaded_by,
-        `🌟 Your resource "${result.rows[0].title}" has been featured!`
+        ` Your resource "${result.rows[0].title}" has been featured!`
       );
     }
 
@@ -799,7 +799,7 @@ exports.createCategory = async (req, res) => {
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const result = await pool.query(
       'INSERT INTO resource_categories (name, slug, icon) VALUES ($1, $2, $3) RETURNING *',
-      [name, slug, icon || '📄']
+      [name, slug, icon || '']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
