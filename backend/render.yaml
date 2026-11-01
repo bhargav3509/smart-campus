@@ -2,8 +2,7 @@ services:
   - type: web
     name: smart-campus-api
     env: node
-    buildCommand: npm install
-    preDeployCommand: node src/db/migrate.js
+    buildCommand: npm install && node src/db/migrate.js
     startCommand: node src/index.js
     envVars:
       - key: NODE_ENV
