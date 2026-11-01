@@ -8,7 +8,8 @@ import { FullPageSpinner } from '../components/ui/Spinner';
 
 const BLUE = '#1a73e8';
 
-
+const IconUser    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const IconHome    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 
 const IC = 'w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all';
 
@@ -23,7 +24,7 @@ const ROLE_COLOR = {
 const VIEW_FIELDS = {
   student: (p) => [
     { label: 'Email',         value: p?.email },
-    { label: 'Account',       value: 'Active', green: true },
+    { label: 'Account',       value: 'Active ✓', green: true },
     { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
     { label: 'Department',    value: p?.department  || '—' },
     { label: 'Phone',         value: p?.phone       || '—' },
@@ -33,7 +34,7 @@ const VIEW_FIELDS = {
   ],
   faculty: (p) => [
     { label: 'Email',         value: p?.email },
-    { label: 'Account',       value: 'Active', green: true },
+    { label: 'Account',       value: 'Active ✓', green: true },
     { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
     { label: 'Department',    value: p?.department  || '—' },
     { label: 'Phone',         value: p?.phone       || '—' },
@@ -41,7 +42,7 @@ const VIEW_FIELDS = {
   ],
   admin: (p) => [
     { label: 'Email',         value: p?.email },
-    { label: 'Account',       value: 'Active', green: true },
+    { label: 'Account',       value: 'Active ✓', green: true },
     { label: 'Member Since',  value: p?.created_at ? new Date(p.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' }) : '—' },
     { label: 'Department',    value: p?.department  || '—' },
     { label: 'Phone',         value: p?.phone       || '—' },
@@ -161,8 +162,8 @@ const Profile = () => {
   const homeRoute = user?.role === 'admin' ? '/admin' : user?.role === 'faculty' ? '/faculty' : '/student';
 
   const sidebarTop = [
-    { label: 'Back',    onClick: () => navigate(homeRoute) },
-    { label: 'Profile', active: activeSection === 'profile',  onClick: () => setActiveSection('profile') },
+    { icon: IconHome, label: 'Back',    onClick: () => navigate(homeRoute) },
+    { icon: IconUser, label: 'Profile', active: activeSection === 'profile',  onClick: () => setActiveSection('profile') },
   ];
 
   return (
@@ -201,7 +202,7 @@ const Profile = () => {
               className="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg hover:opacity-90 transition-opacity disabled:opacity-50"
               style={{ backgroundColor: BLUE }}
             >
-Photo
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </div>

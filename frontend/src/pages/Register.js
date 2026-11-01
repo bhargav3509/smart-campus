@@ -8,6 +8,18 @@ const BLUE = '#1a73e8';
 const RED = '#ea4335';
 const GREEN = '#34a853';
 
+const IconCheck = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+
+const IconCircle = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+);
+
 const getStrength = (password) => {
   let score = 0;
   if (password.length >= 8) score++;
@@ -154,7 +166,7 @@ const Register = () => {
                 ].map(({ key, label }) => (
                   <li key={key} className="text-[10px] flex items-center gap-2 font-black uppercase tracking-wider"
                     style={{ color: checks[key] ? GREEN : '#d1d5db' }}>
-                     {label}
+                    {checks[key] ? <IconCheck /> : <IconCircle />} {label}
                   </li>
                 ))}
               </ul>
@@ -172,7 +184,7 @@ const Register = () => {
               <p className="text-[10px] font-black uppercase tracking-wider mt-1.5" style={{ color: RED }}>Mismatch detected</p>
             )}
             {form.confirm && form.password === form.confirm && (
-              <p className="text-[10px] font-black uppercase tracking-wider mt-1.5 flex items-center gap-1" style={{ color: GREEN }}> Passwords match</p>
+              <p className="text-[10px] font-black uppercase tracking-wider mt-1.5 flex items-center gap-1" style={{ color: GREEN }}><IconCheck /> Passwords match</p>
             )}
           </div>
 

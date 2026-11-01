@@ -10,7 +10,10 @@ import { fmtDateTime, fmtTime } from '../utils/time';
 const BLUE  = '#1a73e8';
 const GREEN = '#34a853';
 
-
+/* ─── Icons ─── */
+const IconEvents   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+const IconBookings = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const IconProfile  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 
 const IC = 'w-full bg-gray-50 border border-gray-100 rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all';
 
@@ -89,12 +92,12 @@ const FacultyDashboard = () => {
   if (loading) return <FullPageSpinner />;
 
   const sidebarTop = [
-    { label: 'My Events', active: activeTab === 'events',   onClick: () => setActiveTab('events') },
-    { label: 'Bookings',  active: activeTab === 'bookings', onClick: () => setActiveTab('bookings') },
-    { label: 'Resources', onClick: () => navigate('/resources') },
+    { icon: IconEvents,   label: 'My Events', active: activeTab === 'events',   onClick: () => setActiveTab('events') },
+    { icon: IconBookings, label: 'Bookings',  active: activeTab === 'bookings', onClick: () => setActiveTab('bookings') },
+    { icon: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>, label: 'Resources', onClick: () => navigate('/resources') },
   ];
   const sidebarBottom = [
-    { label: 'Profile', onClick: () => navigate('/profile') },
+    { icon: IconProfile, label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
   const headerActions = (
@@ -138,7 +141,9 @@ const FacultyDashboard = () => {
           <div className="mb-8 bg-white rounded-[32px] p-8 border border-blue-100/50 shadow-soft animate-slide-up">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-black font-display">New Engagement Request</h3>
-              <button onClick={() => setShowEventForm(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">x</button>
+              <button onClick={() => setShowEventForm(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <form onSubmit={handleCreateEvent} className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <input type="text" placeholder="Event Title *" className={IC} required onChange={e => setEventForm(f => ({...f, title: e.target.value}))} />
@@ -174,7 +179,9 @@ const FacultyDashboard = () => {
           <div className="mb-8 bg-white rounded-[32px] p-8 border border-green-100/50 shadow-soft animate-slide-up">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-black font-display">Venue Reservation</h3>
-              <button onClick={() => setShowBookingForm(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">x</button>
+              <button onClick={() => setShowBookingForm(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <form onSubmit={handleCreateBooking} className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
@@ -203,6 +210,7 @@ const FacultyDashboard = () => {
         {activeTab === 'events' && (
           events.length === 0
             ? <EmptyState title="No Events Yet" description="Create your first event using the button above"
+                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
               />
             : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events.map((event, idx) => (
@@ -220,8 +228,8 @@ const FacultyDashboard = () => {
                       <h3 className="text-xl font-black text-gray-900 mb-1 font-display line-clamp-2">{event.title}</h3>
                       <p className="text-xs text-gray-400 line-clamp-2 mb-4 font-medium">{event.description}</p>
                       <div className="mt-auto space-y-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-4 border-t border-gray-50">
-                        <p>Venue: {event.venue_name || 'No venue'}</p>
-                        <p>Date: {fmtDateTime(event.start_time)}</p>
+                        <p>📍 {event.venue_name || 'No venue'}</p>
+                        <p>📅 {fmtDateTime(event.start_time)}</p>
                       </div>
                     </div>
                   </div>
@@ -233,6 +241,7 @@ const FacultyDashboard = () => {
         {activeTab === 'bookings' && (
           myBookings.length === 0
             ? <EmptyState title="No Bookings Yet" description="Request a venue using the button above"
+                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>}
               />
             : <div className="space-y-4">
                 {myBookings.map((b, idx) => (
@@ -244,7 +253,7 @@ const FacultyDashboard = () => {
                         <StatusBadge status={b.status} />
                       </div>
                       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        <span>Date: {fmtDateTime(b.start_time)}</span>
+                        <span>📅 {fmtDateTime(b.start_time)}</span>
                         <span>→ {fmtTime(b.end_time)}</span>
                       </div>
                     </div>

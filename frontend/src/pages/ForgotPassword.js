@@ -7,6 +7,18 @@ import gsap from 'gsap';
 const BLUE = '#1a73e8';
 
 // SVG Icons
+const IconMail = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+  </svg>
+);
+
+const IconArrowLeft = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+  </svg>
+);
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,7 +68,7 @@ const ForgotPassword = () => {
           <div className="text-center space-y-6 py-4">
             <div className="flex justify-center text-blue-600 mb-6">
               <div className="p-6 bg-blue-50 rounded-[32px] border border-blue-100">
-                
+                <IconMail />
               </div>
             </div>
             <h2 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Big Shoulders Display", sans-serif' }}>Check your email</h2>
@@ -65,7 +77,7 @@ const ForgotPassword = () => {
             </p>
             <div className="pt-6 border-t border-gray-50">
               <Link to="/login" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors">
-                 Return to Sign In
+                <IconArrowLeft /> Return to Sign In
               </Link>
             </div>
           </div>
@@ -92,7 +104,7 @@ const ForgotPassword = () => {
             </div>
             <div className="anim-el mt-8 pt-6 border-t border-gray-50 text-center">
               <Link to="/login" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors">
-                 Return to Sign In
+                <IconArrowLeft /> Return to Sign In
               </Link>
             </div>
           </form>

@@ -7,7 +7,7 @@ const FROM_NAME  = process.env.EMAIL_FROM_NAME    || 'EveSphere';
 let client = null;
 
 if (!process.env.BREVO_API_KEY) {
-  console.warn('️  BREVO_API_KEY not set — emails will be skipped');
+  console.warn('⚠️  BREVO_API_KEY not set — emails will be skipped');
 } else {
   client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
   console.log(`Email service ready! (Brevo — sending from ${FROM_EMAIL})`);
@@ -33,19 +33,19 @@ const sendEmail = async ({ to, subject, html }) => {
 const sendRegistrationConfirmation = async (userEmail, userName, event) => {
   await sendEmail({
     to: userEmail,
-    subject: ` Registration Confirmed — ${event.title}`,
+    subject: `✅ Registration Confirmed — ${event.title}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#1d4ed8;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">
           <h1 style="color:#fff;margin:0;font-size:22px;">EveSphere</h1>
         </div>
-        <h2 style="color:#1f2937;">Hi ${userName}, you're registered! </h2>
+        <h2 style="color:#1f2937;">Hi ${userName}, you're registered! 🎉</h2>
         <p style="color:#6b7280;">Your registration for the following event has been confirmed:</p>
         <div style="background:#fff;border-left:4px solid #1d4ed8;padding:16px;border-radius:8px;margin:16px 0;">
           <h3 style="color:#1d4ed8;margin:0 0 8px 0;">${event.title}</h3>
-          <p style="color:#374151;margin:4px 0;"> ${event.venue_name || 'TBA'}</p>
-          <p style="color:#374151;margin:4px 0;"> ${new Date(event.start_time).toLocaleString()}</p>
-          <p style="color:#374151;margin:4px 0;"> Ends: ${new Date(event.end_time).toLocaleString()}</p>
+          <p style="color:#374151;margin:4px 0;">📍 ${event.venue_name || 'TBA'}</p>
+          <p style="color:#374151;margin:4px 0;">📅 ${new Date(event.start_time).toLocaleString()}</p>
+          <p style="color:#374151;margin:4px 0;">🕐 Ends: ${new Date(event.end_time).toLocaleString()}</p>
         </div>
         <p style="color:#6b7280;font-size:14px;">See you there!</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;"/>
@@ -59,7 +59,7 @@ const sendBookingStatusEmail = async (userEmail, userName, booking, status) => {
   const ok = status === 'approved';
   await sendEmail({
     to: userEmail,
-    subject: `${ok ? '' : ''} Venue Booking ${ok ? 'Approved' : 'Rejected'} — ${booking.venue_name}`,
+    subject: `${ok ? '✅' : '❌'} Venue Booking ${ok ? 'Approved' : 'Rejected'} — ${booking.venue_name}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#1d4ed8;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">
@@ -68,8 +68,8 @@ const sendBookingStatusEmail = async (userEmail, userName, booking, status) => {
         <h2 style="color:#1f2937;">Hi ${userName}, your booking has been ${status}.</h2>
         <div style="background:#fff;border-left:4px solid ${ok ? '#16a34a' : '#dc2626'};padding:16px;border-radius:8px;margin:16px 0;">
           <h3 style="color:${ok ? '#16a34a' : '#dc2626'};margin:0 0 8px 0;">${booking.venue_name}</h3>
-          <p style="color:#374151;margin:4px 0;"> ${new Date(booking.start_time).toLocaleString()}</p>
-          <p style="color:#374151;margin:4px 0;"> Until: ${new Date(booking.end_time).toLocaleString()}</p>
+          <p style="color:#374151;margin:4px 0;">📅 ${new Date(booking.start_time).toLocaleString()}</p>
+          <p style="color:#374151;margin:4px 0;">🕐 Until: ${new Date(booking.end_time).toLocaleString()}</p>
           <p style="color:#374151;margin:4px 0;">Status: <strong style="color:${ok ? '#16a34a' : '#dc2626'};">${status.toUpperCase()}</strong></p>
         </div>
         ${ok
@@ -85,7 +85,7 @@ const sendBookingStatusEmail = async (userEmail, userName, booking, status) => {
 const sendEventPublishedEmail = async (userEmail, userName, event) => {
   await sendEmail({
     to: userEmail,
-    subject: ` New Event Published — ${event.title}`,
+    subject: `🎯 New Event Published — ${event.title}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#1d4ed8;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">
@@ -95,9 +95,9 @@ const sendEventPublishedEmail = async (userEmail, userName, event) => {
         <div style="background:#fff;border-left:4px solid #7c3aed;padding:16px;border-radius:8px;margin:16px 0;">
           <h3 style="color:#7c3aed;margin:0 0 8px 0;">${event.title}</h3>
           <p style="color:#374151;margin:4px 0;">${event.description || ''}</p>
-          <p style="color:#374151;margin:8px 0 4px 0;"> ${event.venue_name || 'TBA'}</p>
-          <p style="color:#374151;margin:4px 0;"> ${new Date(event.start_time).toLocaleString()}</p>
-          <p style="color:#374151;margin:4px 0;"> Max ${event.max_attendees} attendees</p>
+          <p style="color:#374151;margin:8px 0 4px 0;">📍 ${event.venue_name || 'TBA'}</p>
+          <p style="color:#374151;margin:4px 0;">📅 ${new Date(event.start_time).toLocaleString()}</p>
+          <p style="color:#374151;margin:4px 0;">👥 Max ${event.max_attendees} attendees</p>
         </div>
         <p style="color:#6b7280;">Log in to EveSphere to register for this event.</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;"/>
@@ -129,7 +129,7 @@ const sendRegistrationCancelledEmail = async (userEmail, userName, eventTitle) =
 const sendPasswordResetEmail = async (userEmail, userName, resetLink) => {
   await sendEmail({
     to: userEmail,
-    subject: ` Reset Your EveSphere Password`,
+    subject: `🔐 Reset Your EveSphere Password`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
         <div style="background:#1d4ed8;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">

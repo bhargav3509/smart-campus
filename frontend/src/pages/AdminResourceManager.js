@@ -15,7 +15,11 @@ const PURPLE = '#7c4dff';
 const IC = 'w-full bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-gray-900 dark:text-gray-100';
 
 /* ─── Icons ─── */
-
+const IconResources  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const IconDepts      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const IconSubjects   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>;
+const IconCategories = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>;
+const IconStats      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
 
 /* ─── FormCard ─── */
 const FormCard = ({ title, onClose, children }) => (
@@ -23,7 +27,7 @@ const FormCard = ({ title, onClose, children }) => (
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-2xl font-black font-display text-gray-900 dark:text-white">{title}</h3>
       <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.05] flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">
-x
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     {children}
@@ -66,7 +70,7 @@ const AdminResourceManager = () => {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [deptForm, setDeptForm] = useState({ name: '', code: '' });
   const [subjectForm, setSubjectForm] = useState({ name: '', code: '', department_id: '', semester: '' });
-  const [categoryForm, setCategoryForm] = useState({ name: '', icon: '' });
+  const [categoryForm, setCategoryForm] = useState({ name: '', icon: '📄' });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -130,7 +134,7 @@ const AdminResourceManager = () => {
   // ── Category CRUD ──
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-    try { await API.post('/resource-categories', categoryForm); toast.success('Category added!'); setShowCategoryForm(false); setCategoryForm({ name: '', icon: '' }); fetchData(); }
+    try { await API.post('/resource-categories', categoryForm); toast.success('Category added!'); setShowCategoryForm(false); setCategoryForm({ name: '', icon: '📄' }); fetchData(); }
     catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 
@@ -148,11 +152,11 @@ const AdminResourceManager = () => {
   );
 
   const sidebarTop = [
-    { label: 'Resources',  active: activeTab === 'resources',  onClick: () => setActiveTab('resources') },
-    { label: 'Depts',       active: activeTab === 'departments', onClick: () => setActiveTab('departments') },
-    { label: 'Subjects',   active: activeTab === 'subjects',   onClick: () => setActiveTab('subjects') },
-    { label: 'Categories', active: activeTab === 'categories', onClick: () => setActiveTab('categories') },
-    { label: 'Stats',      active: activeTab === 'stats',      onClick: () => setActiveTab('stats') },
+    { icon: IconResources,  label: 'Resources',  active: activeTab === 'resources',  onClick: () => setActiveTab('resources') },
+    { icon: IconDepts,      label: 'Depts',       active: activeTab === 'departments', onClick: () => setActiveTab('departments') },
+    { icon: IconSubjects,   label: 'Subjects',   active: activeTab === 'subjects',   onClick: () => setActiveTab('subjects') },
+    { icon: IconCategories, label: 'Categories', active: activeTab === 'categories', onClick: () => setActiveTab('categories') },
+    { icon: IconStats,      label: 'Stats',      active: activeTab === 'stats',      onClick: () => setActiveTab('stats') },
   ];
   const sidebarBottom = [];
 
@@ -160,6 +164,7 @@ const AdminResourceManager = () => {
     <div className="flex items-center gap-3">
       {activeTab === 'resources' && (
         <div className="relative hidden md:block">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
             className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-[#111114] border border-gray-100 dark:border-white/[0.06] rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-44 text-gray-900 dark:text-gray-100" />
         </div>
@@ -216,7 +221,7 @@ const AdminResourceManager = () => {
         {activeTab === 'resources' && (
           filteredResources.length === 0
             ? <EmptyState title="No Resources" description="No resources found"
-                />
+                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>} />
             : <div className="space-y-3">
                 {filteredResources.map((r, idx) => (
                   <div key={r.id} className="bg-white dark:bg-[#1a1a1f] rounded-[24px] p-5 border border-gray-100 dark:border-white/[0.06] shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-slide-up"
@@ -224,14 +229,14 @@ const AdminResourceManager = () => {
                     <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/resources/${r.id}`)}>
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-lg font-black text-gray-900 dark:text-white font-display truncate">{r.title}</h3>
-                        {r.is_featured && <span className="text-[8px] font-black px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">FEATURED</span>}
+                        {r.is_featured && <span className="text-[8px] font-black px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">⭐ FEATURED</span>}
                       </div>
                       <div className="flex flex-wrap gap-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        {r.faculty_name && <span>By: {r.faculty_name}</span>}
-                        {r.department_name && <span>{r.department_name}</span>}
-                        {r.category_name && <span>{r.category_name}</span>}
-                        <span>Downloads: {r.download_count || 0}</span>
-                        <span>Rating: {r.avg_rating > 0 ? parseFloat(r.avg_rating).toFixed(1) : '–'}</span>
+                        {r.faculty_name && <span>👤 {r.faculty_name}</span>}
+                        {r.department_name && <span>🏛 {r.department_name}</span>}
+                        {r.category_name && <span>{r.category_icon} {r.category_name}</span>}
+                        <span>⬇ {r.download_count || 0}</span>
+                        <span>⭐ {r.avg_rating > 0 ? parseFloat(r.avg_rating).toFixed(1) : '–'}</span>
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
@@ -239,7 +244,7 @@ const AdminResourceManager = () => {
                         className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${
                           r.is_featured ? 'text-yellow-700 bg-yellow-100 dark:bg-yellow-500/20 dark:text-yellow-400' : 'text-gray-500 bg-gray-100 dark:bg-white/[0.05] dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/[0.08]'
                         }`}>
-                        {r.is_featured ? 'Unfeature' : 'Feature'}
+                        {r.is_featured ? '★ Unfeature' : '☆ Feature'}
                       </button>
                       <button onClick={() => handleDeleteResource(r.id)}
                         className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest text-red-500 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
@@ -267,13 +272,13 @@ const AdminResourceManager = () => {
               </FormCard>
             )}
             {departments.length === 0
-              ? <EmptyState title="No Departments" description="Add your first department" />
+              ? <EmptyState title="No Departments" description="Add your first department" icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>} />
               : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {departments.map((d, idx) => (
                     <div key={d.id} className="bg-white dark:bg-[#1a1a1f] rounded-[28px] p-6 border border-gray-100 dark:border-white/[0.06] shadow-soft hover:-translate-y-1 transition-all duration-300 animate-slide-up"
                       style={{ animationDelay: `${Math.min(idx * 50, 300)}ms` }}>
                       <div className="w-10 h-10 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center mb-4 text-green-600">
-
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                       </div>
                       <h3 className="text-xl font-black text-gray-900 dark:text-white mb-1 font-display">{d.name}</h3>
                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">Code: {d.code}</p>
@@ -312,7 +317,7 @@ const AdminResourceManager = () => {
               </FormCard>
             )}
             {subjects.length === 0
-              ? <EmptyState title="No Subjects" description="Add your first subject" />
+              ? <EmptyState title="No Subjects" description="Add your first subject" icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>} />
               : <div className="space-y-3">
                   {subjects.map((s, idx) => (
                     <div key={s.id} className="bg-white dark:bg-[#1a1a1f] rounded-[24px] p-5 border border-gray-100 dark:border-white/[0.06] shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-slide-up"
@@ -320,9 +325,9 @@ const AdminResourceManager = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-black text-gray-900 dark:text-white font-display">{s.name}</h3>
                         <div className="flex flex-wrap gap-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                          <span>{s.code}</span>
-                          {s.department_name && <span>{s.department_name}</span>}
-                          <span>Semester {s.semester}</span>
+                          <span>📋 {s.code}</span>
+                          {s.department_name && <span>🏛 {s.department_name}</span>}
+                          <span>📅 Semester {s.semester}</span>
                         </div>
                       </div>
                       <button onClick={() => handleDeleteSubject(s.id)}
@@ -343,7 +348,7 @@ const AdminResourceManager = () => {
               <FormCard title="Add Category" onClose={() => setShowCategoryForm(false)}>
                 <form onSubmit={handleCreateCategory} className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <input type="text" placeholder="Category Name *" className={IC} required value={categoryForm.name} onChange={e => setCategoryForm(f => ({...f, name: e.target.value}))} />
-                  <input type="text" placeholder="Icon Emoji (e.g. )" className={IC} value={categoryForm.icon} onChange={e => setCategoryForm(f => ({...f, icon: e.target.value}))} />
+                  <input type="text" placeholder="Icon Emoji (e.g. 📄)" className={IC} value={categoryForm.icon} onChange={e => setCategoryForm(f => ({...f, icon: e.target.value}))} />
                   <div className="md:col-span-2 flex gap-3">
                     <button type="submit" className="flex-1 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-white shadow-lg" style={{ backgroundColor: PURPLE }}>Add Category</button>
                     <button type="button" onClick={() => setShowCategoryForm(false)} className="px-8 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/[0.05] hover:bg-gray-200 dark:hover:bg-white/[0.08] transition-colors">Cancel</button>
@@ -352,7 +357,7 @@ const AdminResourceManager = () => {
               </FormCard>
             )}
             {categories.length === 0
-              ? <EmptyState title="No Categories" description="Add your first category" />
+              ? <EmptyState title="No Categories" description="Add your first category" icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>} />
               : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {categories.map((c, idx) => (
                     <div key={c.id} className="bg-white dark:bg-[#1a1a1f] rounded-[28px] p-6 border border-gray-100 dark:border-white/[0.06] shadow-soft hover:-translate-y-1 transition-all duration-300 animate-slide-up"
@@ -376,13 +381,13 @@ const AdminResourceManager = () => {
             {/* Stat cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatCard label="Total Resources" value={stats.total_resources} color={BLUE} delay={0}
-icon={null} />
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>} />
               <StatCard label="This Month" value={stats.this_month} color={GREEN} delay={50}
-icon={null} />
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>} />
               <StatCard label="Departments" value={departments.length} color={PURPLE} delay={100}
-icon={null} />
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>} />
               <StatCard label="Categories" value={categories.length} color={RED} delay={150}
-icon={null} />
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>} />
             </div>
 
             {/* Download chart */}
@@ -416,7 +421,7 @@ icon={null} />
                             <p className="text-[9px] font-bold text-gray-400">{r.faculty_name}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-black text-blue-600 flex-shrink-0">{r.download_count} downloads</span>
+                        <span className="text-xs font-black text-blue-600 flex-shrink-0">{r.download_count} ⬇</span>
                       </div>
                     ))}
                   </div>
@@ -435,7 +440,7 @@ icon={null} />
                             <p className="text-[9px] font-bold text-gray-400">{r.faculty_name}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-black text-yellow-600 flex-shrink-0">{parseFloat(r.avg_rating).toFixed(1)}</span>
+                        <span className="text-xs font-black text-yellow-600 flex-shrink-0">⭐ {parseFloat(r.avg_rating).toFixed(1)}</span>
                       </div>
                     ))}
                   </div>

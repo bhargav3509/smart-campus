@@ -16,11 +16,15 @@ const RED = '#ea4335';
 const PURPLE = '#7c4dff';
 const ACCENTS = [BLUE, GREEN, YELLOW, RED, PURPLE];
 
-
+/* ─── Icons ─── */
+const IconHome     = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const IconEvents   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+const IconProfile  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 
 /* ─── Poster placeholder ─── */
 const PosterPlaceholder = ({ title, color }) => (
   <div className="w-full h-full flex items-center justify-center text-white/30" style={{ background: `linear-gradient(135deg, ${color}20, ${color}10)` }}>
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
   </div>
 );
 
@@ -63,13 +67,16 @@ const EventCard = ({ event, idx, registered, past, onRegister, onCancel, onViewT
 
         <div className="space-y-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-5">
           <div className="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             {event.venue_name || 'TBA'}
           </div>
           <div className="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             {fmtDateTime(event.start_time)}
           </div>
           {event.organizer_name && (
             <div className="flex items-center gap-2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               {event.organizer_name}
             </div>
           )}
@@ -83,12 +90,12 @@ const EventCard = ({ event, idx, registered, past, onRegister, onCancel, onViewT
           ) : registered ? (
             <div className="space-y-2">
               <div className="w-full py-2.5 rounded-xl bg-green-50 text-green-600 text-center text-[9px] font-black uppercase tracking-widest border border-green-100">
-                Registered
+                ✓ Registered
               </div>
               <div className="flex gap-2">
                 <button onClick={onViewTicket}
                   className="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors">
-                  Ticket
+                  🎟 Ticket
                 </button>
                 <button onClick={onCancel}
                   className="flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-100 transition-colors">
@@ -116,8 +123,8 @@ const RegRow = ({ reg, idx, onViewTicket, onCancel }) => (
     <div className="flex-1 min-w-0">
       <h3 className="text-xl font-black text-gray-900 mb-1.5 font-display truncate">{reg.event_title}</h3>
       <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-        <span className="flex items-center gap-1.5">Venue: {reg.venue_name || 'TBA'}</span>
-        <span className="flex items-center gap-1.5">Date: {fmtDateTime(reg.start_time)}</span>
+        <span className="flex items-center gap-1.5">📍 {reg.venue_name || 'TBA'}</span>
+        <span className="flex items-center gap-1.5">📅 {fmtDateTime(reg.start_time)}</span>
         <span className={`px-2.5 py-0.5 rounded-full text-[9px] ${reg.status === 'attended' ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
           {reg.status}
         </span>
@@ -127,7 +134,7 @@ const RegRow = ({ reg, idx, onViewTicket, onCancel }) => (
       <button onClick={onViewTicket}
         className="px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white shadow-md active:scale-95 transition-all"
         style={{ backgroundColor: BLUE, boxShadow: `0 4px 12px ${BLUE}30` }}>
-        QR Ticket
+        🎟 QR Ticket
       </button>
       {reg.status === 'registered' && (
         <button onClick={onCancel}
@@ -200,12 +207,12 @@ const StudentDashboard = () => {
   if (loading) return <FullPageSpinner />;
 
   const sidebarTop = [
-    { label: 'Home',     active: activeTab === 'events',         onClick: () => setActiveTab('events') },
-    { label: 'My Events', active: activeTab === 'registrations',  onClick: () => setActiveTab('registrations') },
-    { label: 'Resources', onClick: () => navigate('/resources') },
+    { icon: IconHome,   label: 'Home',     active: activeTab === 'events',         onClick: () => setActiveTab('events') },
+    { icon: IconEvents, label: 'My Events', active: activeTab === 'registrations',  onClick: () => setActiveTab('registrations') },
+    { icon: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>, label: 'Resources', onClick: () => navigate('/resources') },
   ];
   const sidebarBottom = [
-    { label: 'Profile', onClick: () => navigate('/profile') },
+    { icon: IconProfile, label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
   const headerActions = activeTab === 'events' ? (
@@ -245,6 +252,7 @@ const StudentDashboard = () => {
             ? <EmptyState
                 title="No Events Yet"
                 description="Events will appear here once published"
+                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>}
               />
             : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {sortedEvents.map((event, idx) => (
@@ -268,6 +276,7 @@ const StudentDashboard = () => {
             ? <EmptyState
                 title="No Registrations Yet"
                 description="Events you sign up for will appear here"
+                icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
                 action={
                   <button onClick={() => setActiveTab('events')}
                     className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white"

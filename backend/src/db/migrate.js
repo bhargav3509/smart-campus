@@ -18,7 +18,7 @@ async function migrate() {
         registration_status VARCHAR(20) DEFAULT 'active' CHECK (registration_status IN ('active', 'inactive', 'suspended'))
       );
     `);
-    console.log('[OK] authorized_users table created (or already exists)');
+    console.log('✓ authorized_users table created (or already exists)');
 
     // Ensure assigned_role constraint includes super_admin if table already existed
     await client.query(`
@@ -33,13 +33,13 @@ async function migrate() {
     await client.query(`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
     `);
-    console.log('[OK] is_active column added to users (or already exists)');
+    console.log('✓ is_active column added to users (or already exists)');
 
     // ── 3. Add university_id column to users (safe, allow NULL initially) ─────
     await client.query(`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS university_id VARCHAR(50);
     `);
-    console.log('[OK] university_id column added to users (or already exists)');
+    console.log('✓ university_id column added to users (or already exists)');
 
     // ── 4. Update role CHECK constraint to allow super_admin ─────────────────
     await client.query(`
@@ -49,7 +49,7 @@ async function migrate() {
       ALTER TABLE users ADD CONSTRAINT users_role_check
         CHECK (role IN ('student', 'faculty', 'admin', 'super_admin'));
     `);
-    console.log('[OK] users role CHECK constraint updated to include super_admin');
+    console.log('✓ users role CHECK constraint updated to include super_admin');
 
     // ── 5. Seed authorized_users ──────────────────────────────────────────────
     const authorizedUsers = [
@@ -82,7 +82,7 @@ async function migrate() {
         [uid, name, email, dept, role, status]
       );
     }
-    console.log('[OK] authorized_users seeded and synchronized');
+    console.log('✓ authorized_users seeded and synchronized');
 
     // ── 6. Create or Update Super Admin Bhargav (24bcs11028@cuchd.in) ─────────
     const bhargavEmail = '24bcs11028@cuchd.in';
@@ -97,7 +97,7 @@ async function migrate() {
          VALUES ($1, $2, $3, 'super_admin', true, $4, 'Computer Science')`,
         ['Bhargav', bhargavEmail, bhargavPassword, '24BCS11028']
       );
-      console.log('[OK] Super Admin Bhargav created');
+      console.log('✓ Super Admin Bhargav created');
     } else {
       await client.query(
         `UPDATE users SET
@@ -110,7 +110,7 @@ async function migrate() {
          WHERE email = $4`,
         ['Bhargav', bhargavPassword, '24BCS11028', bhargavEmail]
       );
-      console.log('[OK] Super Admin Bhargav updated with role super_admin and requested credentials');
+      console.log('✓ Super Admin Bhargav updated with role super_admin and requested credentials');
     }
 
     // ── 7. Ensure fallback Super Admin exists ─────────────────────────────────
@@ -126,12 +126,12 @@ async function migrate() {
          VALUES ($1, $2, $3, $4, $5, $6)`,
         ['Super Admin', superAdminEmail, hashedPassword, 'super_admin', true, 'SUPER001']
       );
-      console.log('[OK] Fallback Super Admin created');
+      console.log('✓ Fallback Super Admin created');
     }
 
-    console.log('\n[DONE] Migration completed successfully!');
+    console.log('\n✅ Migration completed successfully!');
   } catch (err) {
-    console.error('[ERROR] Migration failed:', err.message);
+    console.error('❌ Migration failed:', err.message);
     throw err;
   } finally {
     client.release();
