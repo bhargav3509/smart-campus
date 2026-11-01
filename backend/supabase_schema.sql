@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.authorized_users (
     full_name           character varying(100)  NOT NULL,
     university_email    character varying(100)  UNIQUE NOT NULL,
     department          character varying(100)  NOT NULL,
-    assigned_role       character varying(20)   NOT NULL CHECK (assigned_role IN ('student', 'faculty', 'admin')),
+    assigned_role       character varying(20)   NOT NULL CHECK (assigned_role IN ('student', 'faculty', 'admin', 'super_admin')),
     registration_status character varying(20)   DEFAULT 'active' CHECK (registration_status IN ('active', 'inactive', 'suspended'))
 );
 
@@ -126,22 +126,40 @@ ON CONFLICT (id) DO NOTHING;
 -- Seed Authorized Users (Mock University Registry)
 INSERT INTO public.authorized_users (university_id, full_name, university_email, department, assigned_role, registration_status)
 VALUES
-  ('STU001', 'Alice Johnson',      'alice.johnson@evesphere.edu',   'Computer Science',         'student', 'active'),
-  ('STU002', 'Benjamin Carter',    'ben.carter@evesphere.edu',      'Electrical Engineering',   'student', 'active'),
-  ('STU003', 'Priya Sharma',       'priya.sharma@evesphere.edu',    'Information Technology',   'student', 'active'),
-  ('STU004', 'Marcus Williams',    'marcus.williams@evesphere.edu', 'Mechanical Engineering',   'student', 'active'),
-  ('STU005', 'Sofia Chen',         'sofia.chen@evesphere.edu',      'Computer Science',         'student', 'active'),
-  ('STU006', 'Rahul Mehta',        'rahul.mehta@evesphere.edu',     'Civil Engineering',        'student', 'active'),
-  ('STU007', 'Emma Thompson',      'emma.thompson@evesphere.edu',   'Business Administration',  'student', 'active'),
-  ('STU008', 'David Nguyen',       'david.nguyen@evesphere.edu',    'Computer Science',         'student', 'active'),
-  ('FAC001', 'Dr. Anita Kapoor',   'anita.kapoor@evesphere.edu',   'Computer Science',         'faculty', 'active'),
-  ('FAC002', 'Prof. James O''Brien','james.obrien@evesphere.edu',   'Electrical Engineering',   'faculty', 'active'),
-  ('FAC003', 'Dr. Linda Park',     'linda.park@evesphere.edu',      'Information Technology',   'faculty', 'active'),
-  ('FAC004', 'Prof. Rajesh Iyer',  'rajesh.iyer@evesphere.edu',     'Mechanical Engineering',   'faculty', 'active'),
-  ('ADM001', 'Carol White',        'carol.white@evesphere.edu',     'Administration',           'admin',   'active')
-ON CONFLICT DO NOTHING;
+  ('24BCS11028', 'Bhargav',         '24bcs11028@cuchd.in',           'Computer Science',         'super_admin', 'active'),
+  ('STU001',     'Alice Johnson',   'alice.johnson@evesphere.edu',   'Computer Science',         'student',     'active'),
+  ('STU002',     'Benjamin Carter', 'ben.carter@evesphere.edu',      'Electrical Engineering',   'student',     'active'),
+  ('STU003',     'Priya Sharma',    'priya.sharma@evesphere.edu',    'Information Technology',   'student',     'active'),
+  ('STU004',     'Marcus Williams', 'marcus.williams@evesphere.edu', 'Mechanical Engineering',   'student',     'active'),
+  ('STU005',     'Sofia Chen',      'sofia.chen@evesphere.edu',      'Computer Science',         'student',     'active'),
+  ('STU006',     'Rahul Mehta',     'rahul.mehta@evesphere.edu',     'Civil Engineering',        'student',     'active'),
+  ('STU007',     'Emma Thompson',   'emma.thompson@evesphere.edu',   'Business Administration',  'student',     'active'),
+  ('STU008',     'David Nguyen',    'david.nguyen@evesphere.edu',    'Computer Science',         'student',     'active'),
+  ('FAC001',     'Dr. Anita Kapoor','anita.kapoor@evesphere.edu',   'Computer Science',         'faculty',     'active'),
+  ('FAC002',     'Prof. James O''Brien','james.obrien@evesphere.edu', 'Electrical Engineering',   'faculty',     'active'),
+  ('FAC003',     'Dr. Linda Park',  'linda.park@evesphere.edu',      'Information Technology',   'faculty',     'active'),
+  ('FAC004',     'Prof. Rajesh Iyer','rajesh.iyer@evesphere.edu',    'Mechanical Engineering',   'faculty',     'active'),
+  ('ADM001',     'Carol White',     'carol.white@evesphere.edu',     'Administration',           'admin',       'active')
+ON CONFLICT (university_id) DO UPDATE SET
+  full_name = EXCLUDED.full_name,
+  university_email = EXCLUDED.university_email,
+  department = EXCLUDED.department,
+  assigned_role = EXCLUDED.assigned_role,
+  registration_status = EXCLUDED.registration_status;
 
--- Super Admin User
+-- Super Admin User Bhargav (24bcs11028@cuchd.in)
+INSERT INTO public.users (id, name, email, password, role, is_active, university_id, department)
+VALUES
+  ('a701a410-0eda-4e93-b5b2-c47f122ecfb1', 'Bhargav', '24bcs11028@cuchd.in', '$2b$12$Nq9rG/GfF1Jg94h6Jt.ZseY6u.H2V9e4u5x4k3J9h1q6Y2z0q2m5S', 'super_admin', true, '24BCS11028', 'Computer Science')
+ON CONFLICT (email) DO UPDATE SET
+  name = EXCLUDED.name,
+  password = EXCLUDED.password,
+  role = 'super_admin',
+  is_active = true,
+  university_id = EXCLUDED.university_id,
+  department = 'Computer Science';
+
+-- Fallback Super Admin User
 INSERT INTO public.users (id, name, email, password, role, is_active, university_id)
 VALUES
   ('a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'Super Admin', 'superadmin@evesphere.edu', '$2b$12$Nq9rG/GfF1Jg94h6Jt.ZseY6u.H2V9e4u5x4k3J9h1q6Y2z0q2m5S', 'super_admin', true, 'SUPER001')
@@ -152,7 +170,6 @@ INSERT INTO public.users (id, name, email, password, role, department, created_a
 VALUES
   ('df2cea1e-cc1a-4014-b2f8-548d9a58fe54', 'Bhargav',        'bhargav@test.com',        '$2b$10$NgFGh3bOQnaodOIftsdStupOQIWrlC4osdBoPLwJBqKnUBrO8QY/u', 'student', 'Computer Science',  '2026-03-26 15:42:50.027483'),
   ('d25ceaf1-59aa-42e9-91e9-a32205696eca', 'Admin User',      'admin2@test.com',         '$2b$10$ZmAB0z6RBXn0VijZQf77aeoZXcVbfzyfMDPfNj1rGP/v1XDwDDPGC', 'admin',   'Administration',    '2026-03-26 15:55:46.774492'),
-  ('a701a410-0eda-4e93-b5b2-c47f122ecfb1', 'bhargav',         '24bcs11028@cuchd.in',    '$2b$10$peBgjCjibYmwKVkB8k3A3uFwu9UkAitHvkKT2Y0Z6ztTCQkYFEknO', 'student', 'Computer Science',  '2026-03-26 20:50:13.40969'),
   ('c005e938-98ea-402c-b1ab-147b5b11a885', 'karan',           '24bcs11033@cuchd.in',    '$2b$10$81sxDzl34L9kDfcmR73gjuvMg8Zy4E.PmfXEdauCkUQ6BYSe8TCcS', 'faculty', 'cse',               '2026-03-26 21:03:02.958835'),
   ('32f0a06f-0e1c-48fc-9b2e-7375ae090d66', 'Priyanshu patel', '24bcs12606@cuchd.in',   '$2b$10$5.qJ.h5HfrIwTZcp6PycZu/YjdNSBwzUEeTJXigkH1A.WpvvI.wE.', 'student', 'Computer Science',  '2026-03-30 10:43:43.914161'),
   ('ba57b0df-c6de-4583-bef6-0d1ad71a7091', 'vaibhav',         '24bcs12275@cuchd.in',   '$2b$10$mfAqIsfn83t2B17z6LxgZ.rbnP2ai9k0ZSwv5tO7vvYHfMdI/TET6', 'student', 'Computer Science',  '2026-03-31 14:30:56.262099'),
