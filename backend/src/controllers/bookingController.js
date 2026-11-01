@@ -5,7 +5,7 @@ const { createNotification } = require('./notificationController');
 exports.getBookings = async (req, res) => {
   try {
     let query, params;
-    if (req.user.role === 'admin') {
+    if (['admin', 'super_admin'].includes(req.user.role)) {
       query = `SELECT b.*, u.name as user_name, v.name as venue_name
                FROM bookings b
                LEFT JOIN users u ON b.user_id = u.id
@@ -47,8 +47,8 @@ exports.createBooking = async (req, res) => {
       [venue_id, req.user.id, start_time, end_time]
     );
 
-    // Notify all admins
-    const admins = await pool.query(`SELECT id FROM users WHERE role = 'admin'`);
+    // Notify all admins and super_admins
+    const admins = await pool.query(`SELECT id FROM users WHERE role IN ('admin', 'super_admin')`);
     const venueResult = await pool.query(`SELECT name FROM venues WHERE id = $1`, [venue_id]);
     const venueName = venueResult.rows[0]?.name || 'a venue';
     for (const admin of admins.rows) {
@@ -65,7 +65,7 @@ exports.createBooking = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   const { status } = req.body;
   try {
-    if (req.user.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Admins only' });
     }
 

@@ -71,41 +71,41 @@ function App() {
 
           {/* ── Admin ── */}
           <Route path="/admin" element={
-            <PrivateRoute roles={['admin']}>
+            <PrivateRoute roles={['admin', 'super_admin']}>
               <AdminDashboard />
             </PrivateRoute>
           } />
 
           {/* ── Shared ── */}
           <Route path="/events" element={
-            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+            <PrivateRoute roles={['student', 'faculty', 'admin', 'super_admin']}>
               <Events />
             </PrivateRoute>
           } />
           <Route path="/profile" element={
-            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+            <PrivateRoute roles={['student', 'faculty', 'admin', 'super_admin']}>
               <Profile />
             </PrivateRoute>
           } />
           <Route path="/analytics" element={
-            <PrivateRoute roles={['admin']}>
+            <PrivateRoute roles={['admin', 'super_admin']}>
               <AnalyticsDashboard />
             </PrivateRoute>
           } />
 
           {/* ── Study Resources ── */}
           <Route path="/resources" element={
-            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+            <PrivateRoute roles={['student', 'faculty', 'admin', 'super_admin']}>
               <StudyResources />
             </PrivateRoute>
           } />
           <Route path="/resources/:id" element={
-            <PrivateRoute roles={['student', 'faculty', 'admin']}>
+            <PrivateRoute roles={['student', 'faculty', 'admin', 'super_admin']}>
               <ResourceDetail />
             </PrivateRoute>
           } />
           <Route path="/admin/resources" element={
-            <PrivateRoute roles={['admin']}>
+            <PrivateRoute roles={['admin', 'super_admin']}>
               <AdminResourceManager />
             </PrivateRoute>
           } />

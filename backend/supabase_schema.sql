@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS public.users (
     branch          character varying(100),
     section         character varying(20),
     uid             character varying(50)   UNIQUE,
+    university_id   character varying(50)   UNIQUE,
+    is_active       boolean                 DEFAULT true,
     bio             text,
     avatar_url      character varying(500),
     designation     character varying(255),
@@ -28,7 +30,17 @@ CREATE TABLE IF NOT EXISTS public.users (
     reset_token         character varying(255),
     reset_token_expiry  timestamptz,
     created_at      timestamp without time zone DEFAULT now(),
-    CONSTRAINT users_role_check CHECK (role IN ('student', 'faculty', 'admin'))
+    CONSTRAINT users_role_check CHECK (role IN ('student', 'faculty', 'admin', 'super_admin'))
+);
+
+CREATE TABLE IF NOT EXISTS public.authorized_users (
+    id                  serial                  PRIMARY KEY,
+    university_id       character varying(50)   UNIQUE NOT NULL,
+    full_name           character varying(100)  NOT NULL,
+    university_email    character varying(100)  UNIQUE NOT NULL,
+    department          character varying(100)  NOT NULL,
+    assigned_role       character varying(20)   NOT NULL CHECK (assigned_role IN ('student', 'faculty', 'admin')),
+    registration_status character varying(20)   DEFAULT 'active' CHECK (registration_status IN ('active', 'inactive', 'suspended'))
 );
 
 CREATE TABLE IF NOT EXISTS public.venues (
@@ -101,7 +113,7 @@ LEFT JOIN public.registrations r ON (e.id = r.event_id AND r.status <> 'cancelle
 LEFT JOIN public.venues v ON (e.venue_id = v.id)
 GROUP BY e.id, e.title, e.status, e.max_attendees, v.name;
 
--- ─── Seed Data (optional — comment out if you want a clean slate) ──
+-- ─── Seed Data ─────────────────────────────────────────────
 
 -- Venues
 INSERT INTO public.venues (id, name, capacity, location, amenities, is_active, created_at)
@@ -110,6 +122,30 @@ VALUES
   ('f6c94913-ac43-45a4-bb4f-8bd0c4004e79', 'c1 ground',       400, 'chandigarh university', '{}', true, '2026-03-27 11:59:29.066762'),
   ('9e9442dc-6310-4584-9d06-59f2fee71f59', 'Seminar Hall',    300, 'C2-Block',               '{}', true, '2026-03-31 16:00:39.720484')
 ON CONFLICT (id) DO NOTHING;
+
+-- Seed Authorized Users (Mock University Registry)
+INSERT INTO public.authorized_users (university_id, full_name, university_email, department, assigned_role, registration_status)
+VALUES
+  ('STU001', 'Alice Johnson',      'alice.johnson@evesphere.edu',   'Computer Science',         'student', 'active'),
+  ('STU002', 'Benjamin Carter',    'ben.carter@evesphere.edu',      'Electrical Engineering',   'student', 'active'),
+  ('STU003', 'Priya Sharma',       'priya.sharma@evesphere.edu',    'Information Technology',   'student', 'active'),
+  ('STU004', 'Marcus Williams',    'marcus.williams@evesphere.edu', 'Mechanical Engineering',   'student', 'active'),
+  ('STU005', 'Sofia Chen',         'sofia.chen@evesphere.edu',      'Computer Science',         'student', 'active'),
+  ('STU006', 'Rahul Mehta',        'rahul.mehta@evesphere.edu',     'Civil Engineering',        'student', 'active'),
+  ('STU007', 'Emma Thompson',      'emma.thompson@evesphere.edu',   'Business Administration',  'student', 'active'),
+  ('STU008', 'David Nguyen',       'david.nguyen@evesphere.edu',    'Computer Science',         'student', 'active'),
+  ('FAC001', 'Dr. Anita Kapoor',   'anita.kapoor@evesphere.edu',   'Computer Science',         'faculty', 'active'),
+  ('FAC002', 'Prof. James O''Brien','james.obrien@evesphere.edu',   'Electrical Engineering',   'faculty', 'active'),
+  ('FAC003', 'Dr. Linda Park',     'linda.park@evesphere.edu',      'Information Technology',   'faculty', 'active'),
+  ('FAC004', 'Prof. Rajesh Iyer',  'rajesh.iyer@evesphere.edu',     'Mechanical Engineering',   'faculty', 'active'),
+  ('ADM001', 'Carol White',        'carol.white@evesphere.edu',     'Administration',           'admin',   'active')
+ON CONFLICT DO NOTHING;
+
+-- Super Admin User
+INSERT INTO public.users (id, name, email, password, role, is_active, university_id)
+VALUES
+  ('a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'Super Admin', 'superadmin@evesphere.edu', '$2b$12$Nq9rG/GfF1Jg94h6Jt.ZseY6u.H2V9e4u5x4k3J9h1q6Y2z0q2m5S', 'super_admin', true, 'SUPER001')
+ON CONFLICT (email) DO NOTHING;
 
 -- Users (passwords are bcrypt hashes — login credentials unchanged)
 INSERT INTO public.users (id, name, email, password, role, department, created_at)

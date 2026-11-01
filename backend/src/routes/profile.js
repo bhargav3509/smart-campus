@@ -84,10 +84,10 @@ router.post('/change-password', auth, async (req, res) => {
   }
 });
 
-// Get any user profile by id (admin only)
+// Get any user profile by id (admin + super_admin only)
 router.get('/:id', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Admins only' });
     }
     const result = await pool.query(

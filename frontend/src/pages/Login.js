@@ -44,7 +44,8 @@ const Login = () => {
         localStorage.removeItem('redirect_after_login');
         navigate(redirect);
       } else {
-        if (role === 'admin') navigate('/admin');
+        if (role === 'super_admin') navigate('/admin');
+        else if (role === 'admin') navigate('/admin');
         else if (role === 'faculty') navigate('/faculty');
         else navigate('/student');
       }

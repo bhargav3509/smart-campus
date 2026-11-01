@@ -16,7 +16,7 @@ const validatePassword = (password) => {
 
 // Register
 exports.register = async (req, res) => {
-  const { name, email, password, role, department } = req.body;
+  const { name, university_id, email, password, confirm_password } = req.body;
 
   // Password validation
   const pwErrors = validatePassword(password || '');
@@ -26,20 +26,54 @@ exports.register = async (req, res) => {
     });
   }
 
+  // Confirm password match
+  if (password !== confirm_password) {
+    return res.status(400).json({ message: 'Passwords do not match.' });
+  }
+
   try {
+    // Check authorized_users registry
+    const authCheck = await pool.query(
+      `SELECT * FROM authorized_users
+       WHERE university_id = $1 AND university_email = $2 AND registration_status = 'active'`,
+      [university_id, email]
+    );
+
+    if (authCheck.rows.length === 0) {
+      return res.status(403).json({
+        message: 'Your University ID and email do not match our records. Please contact the registrar.'
+      });
+    }
+
+    const authorized_user = authCheck.rows[0];
+
+    // Check if user already registered
     const userExists = await pool.query(
-      'SELECT * FROM users WHERE email = $1', [email]
+      'SELECT * FROM users WHERE email = $1 OR university_id = $2',
+      [email, university_id]
     );
 
     if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return res.status(409).json({
+        message: 'An account with this email or University ID already exists.'
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const result = await pool.query(
-      'INSERT INTO users (name, email, password, role, department) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role',
-      [name, email, hashedPassword, role || 'student', department]
+      `INSERT INTO users (name, email, password, role, department, university_id, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, name, email, role`,
+      [
+        name,
+        email,
+        hashedPassword,
+        authorized_user.assigned_role,
+        authorized_user.department,
+        university_id,
+        true
+      ]
     );
 
     const user = result.rows[0];
@@ -49,7 +83,11 @@ exports.register = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    res.status(201).json({ user, token });
+    res.status(201).json({
+      message: 'Account created and verified successfully.',
+      user,
+      token
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -69,6 +107,14 @@ exports.login = async (req, res) => {
     }
 
     const user = result.rows[0];
+
+    // Check if account is active
+    if (user.is_active === false) {
+      return res.status(403).json({
+        message: 'Your account has been deactivated. Please contact administration.'
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {

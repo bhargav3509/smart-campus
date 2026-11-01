@@ -20,6 +20,7 @@ const resourceRoutes = require('./routes/resources');
 const departmentRoutes = require('./routes/departments');
 const subjectRoutes = require('./routes/subjects');
 const resourceCategoryRoutes = require('./routes/resourceCategories');
+const adminRoutes = require('./routes/admin');
 
 dotenv.config();
 const app = express();
@@ -82,6 +83,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/resource-categories', resourceCategoryRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

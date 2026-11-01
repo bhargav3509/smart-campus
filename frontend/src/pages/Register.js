@@ -34,7 +34,7 @@ const strengthColors = ['', RED, '#f97316', '#eab308', GREEN];
 
 const Register = () => {
   const [form, setForm] = useState({
-    name: '', email: '', password: '', confirm: '', role: 'student', department: ''
+    name: '', university_id: '', email: '', password: '', confirm: ''
   });
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -72,8 +72,10 @@ const Register = () => {
     setLoading(true);
     try {
       await API.post('/auth/register', {
-        name: form.name, email: form.email, password: form.password,
-        role: form.role, department: form.department,
+        name: form.name,
+        university_id: form.university_id,
+        email: form.email,
+        password: form.password,
       });
       toast.success('Account created! Please login.');
       navigate('/login');
@@ -102,6 +104,7 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Full Name */}
           <div className="anim-el">
             <label className={labelClass}>Full Name</label>
             <input type="text" name="name" value={form.name} onChange={handleChange}
@@ -109,13 +112,29 @@ const Register = () => {
               onFocus={e => e.target.style.borderColor = BLUE}
               onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
+
+          {/* University ID */}
           <div className="anim-el">
-            <label className={labelClass}>Email Address</label>
+            <label className={labelClass}>University ID</label>
+            <input type="text" name="university_id" value={form.university_id} onChange={handleChange}
+              className={inputClass} placeholder="e.g. STU001" required
+              onFocus={e => e.target.style.borderColor = BLUE}
+              onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+            <p className="text-[10px] text-gray-400 mt-1.5">
+              Your role will be automatically assigned based on university records.
+            </p>
+          </div>
+
+          {/* University Email */}
+          <div className="anim-el">
+            <label className={labelClass}>University Email</label>
             <input type="email" name="email" value={form.email} onChange={handleChange}
-              className={inputClass} placeholder="name@college.edu" required
+              className={inputClass} placeholder="yourname@evesphere.edu" required
               onFocus={e => e.target.style.borderColor = BLUE}
               onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
+
+          {/* Password */}
           <div className="anim-el">
             <label className={labelClass}>Password</label>
             <input type="password" name="password" value={form.password} onChange={handleChange}
@@ -154,6 +173,7 @@ const Register = () => {
             )}
           </div>
 
+          {/* Confirm Password */}
           <div className="anim-el">
             <label className={labelClass}>Confirm Password</label>
             <input type="password" name="confirm" value={form.confirm} onChange={handleChange}
@@ -166,24 +186,6 @@ const Register = () => {
             {form.confirm && form.password === form.confirm && (
               <p className="text-[10px] font-black uppercase tracking-wider mt-1.5 flex items-center gap-1" style={{ color: GREEN }}><IconCheck /> Passwords match</p>
             )}
-          </div>
-
-          <div className="anim-el">
-            <label className={labelClass}>Access Role</label>
-            <select name="role" value={form.role} onChange={handleChange} className={inputClass}
-              onFocus={e => e.target.style.borderColor = BLUE}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'}>
-              <option value="student">Student Account</option>
-              <option value="faculty">Faculty Member</option>
-              <option value="admin">Platform Admin</option>
-            </select>
-          </div>
-          <div className="anim-el">
-            <label className={labelClass}>Department</label>
-            <input type="text" name="department" value={form.department} onChange={handleChange}
-              className={inputClass} placeholder="e.g. Computer Science"
-              onFocus={e => e.target.style.borderColor = BLUE}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
           </div>
 
           <div className="anim-el pt-4">

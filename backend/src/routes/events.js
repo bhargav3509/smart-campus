@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { requireRole } = require('../middleware/auth');
 const upload = require('../utils/upload');
 const pool = require('../config/db');
 const {
@@ -40,7 +41,7 @@ router.put('/:id/poster', auth, upload.single('poster'), updateEventPoster);
 router.post('/:id/register', auth, registerForEvent);
 router.delete('/:id', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Admins only' });
     }
     // Delete related registrations first, then the event

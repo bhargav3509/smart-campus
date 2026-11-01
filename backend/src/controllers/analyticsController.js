@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 exports.getStats = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (!['admin', 'super_admin'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Admins only' });
     }
 
@@ -10,7 +10,8 @@ exports.getStats = async (req, res) => {
       pool.query(`SELECT COUNT(*) as total,
         SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students,
         SUM(CASE WHEN role = 'faculty' THEN 1 ELSE 0 END) as faculty,
-        SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins
+        SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
+        SUM(CASE WHEN role = 'super_admin' THEN 1 ELSE 0 END) as super_admins
         FROM users`),
 
       pool.query(`SELECT COUNT(*) as total,

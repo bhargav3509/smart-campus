@@ -29,11 +29,11 @@ exports.getEvents = async (req, res) => {
     if (status && status !== 'all') {
       params.push(status);
       query += ` AND e.status = $${params.length}`;
-    } else if (!status && req.user.role !== 'admin') {
+    } else if (!status && !['admin', 'super_admin'].includes(req.user.role)) {
       // Students and faculty only see published events
       query += ` AND e.status = 'published'`;
     }
-    // admin with no status filter or status=all sees everything
+    // admin/super_admin with no status filter or status=all sees everything
 
     query += ` ORDER BY e.start_time ASC`;
 

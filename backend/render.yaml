@@ -3,6 +3,7 @@ services:
     name: smart-campus-api
     env: node
     buildCommand: npm install
+    preDeployCommand: node src/db/migrate.js
     startCommand: node src/index.js
     envVars:
       - key: NODE_ENV
@@ -35,4 +36,3 @@ services:
         value: ap-south-1
       - key: AWS_S3_BUCKET
         value: evesphere-uploads
-
