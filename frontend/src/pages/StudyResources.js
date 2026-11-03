@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +24,27 @@ const IconBookmark  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill
 const IconHistory   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
 const IconMyUploads = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>;
 const IconProfile   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+/* --- Category icon map (slug ? SVG) --- */
+const CATEGORY_ICONS = {
+  'assignments':        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>,
+  'ebooks':             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>,
+  'lab-manuals':        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3v11l-3 5h12l-3-5V3"/><line x1="9" y1="3" x2="15" y2="3"/><circle cx="14" cy="17" r="1"/></svg>,
+  'lecture-notes':      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>,
+  'other':              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>,
+  'presentations':      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+  'practical-files':    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><polyline points="10 13 8 15 10 17"/><polyline points="14 13 16 15 14 17"/></svg>,
+  'question-papers':    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  'recorded-lectures':  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>,
+  'reference-material': <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  'sample-programs':    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+  'tutorials':          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+};
+const DEFAULT_CAT_ICON = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>;
+const CategoryIcon = ({ slug, size = 16 }) => (
+  <span style={{ width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', verticalAlign: 'middle' }}>
+    {React.cloneElement(CATEGORY_ICONS[slug] || DEFAULT_CAT_ICON, { width: size, height: size })}
+  </span>
+);
 
 /* ─── File type helpers ─── */
 const FILE_ICONS = {
@@ -87,7 +109,7 @@ const ResourceCard = ({ resource, idx, onBookmark, onDownload, onClick, isBookma
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {resource.category_name && (
             <span className="text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest bg-gray-50 dark:bg-white/[0.05] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-white/[0.06]">
-              {resource.category_icon} {resource.category_name}
+              <CategoryIcon slug={resource.category_slug} /> {resource.category_name}
             </span>
           )}
           {resource.file_type && (
@@ -181,7 +203,7 @@ const ResourceForm = ({ form, setForm, onSubmit, submitLabel, onCancel, isEdit =
       <input type="text" placeholder="Resource Title *" className={IC} required value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} />
       <select className={IC} value={form.category_id} onChange={e => setForm(f => ({...f, category_id: e.target.value}))}>
         <option value="">Select Category</option>
-        {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select>
       <textarea placeholder="Description" rows={3} className={`${IC} md:col-span-2 h-24 resize-none`} value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} />
       <select className={IC} value={form.department_id} onChange={e => setForm(f => ({...f, department_id: e.target.value, subject_id: ''}))}>
@@ -572,7 +594,7 @@ const StudyResources = () => {
             <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
               className="bg-white dark:bg-[#1a1a1f] border border-gray-100 dark:border-white/[0.06] px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 shadow-soft focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
               <option value="">All Categories</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select value={filterType} onChange={e => setFilterType(e.target.value)}
               className="bg-white dark:bg-[#1a1a1f] border border-gray-100 dark:border-white/[0.06] px-4 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 shadow-soft focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
@@ -656,7 +678,7 @@ const StudyResources = () => {
                           )}
                         </div>
                         <div className="flex flex-wrap gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          {r.category_name && <span>{r.category_icon} {r.category_name}</span>}
+                          {r.category_name && <span><CategoryIcon slug={r.category_slug} size={14} /> {r.category_name}</span>}
                           {r.department_name && <span>🏛 {r.department_name}</span>}
                           {r.semester && <span>📅 Sem {r.semester}</span>}
                           <span>⬇ {r.download_count || 0} downloads</span>
