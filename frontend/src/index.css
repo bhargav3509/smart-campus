@@ -118,10 +118,10 @@
 /* Main backgrounds */
 .dark body,
 .dark .bg-\[\#f8f9fc\] {
-  background-color: #0d0d14 !important;
+  background-color: #000000 !important;
   background-image:
-    linear-gradient(rgba(139, 92, 246, 0.20) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.20) 1px, transparent 1px) !important;
+    linear-gradient(rgba(239, 68, 68, 0.20) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.20) 1px, transparent 1px) !important;
   background-size: 60px 60px !important;
 }
 
